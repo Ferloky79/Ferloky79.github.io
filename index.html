@@ -7,6 +7,9 @@
   <meta name="theme-color" content="#10121c">
   <title>GameVault · Tu próximo juego empieza aquí</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="vendor/supabase-2.99.1.js" defer></script>
+  <script src="supabase-config.js" defer></script>
+  <script src="supabase-api.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -130,7 +133,7 @@
       </nav>
       <div class="checkout-heading">
         <div><h1 id="checkout-titulo" tabindex="-1">Finalizar compra</h1><p>Revisa tus datos y completa el pago de forma segura.</p></div>
-        <span class="checkout-status"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg> Pago seguro</span>
+        <span class="checkout-status"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg> Pago simulado</span>
       </div>
       <div class="checkout-progress" aria-label="Progreso de compra">
         <span class="is-complete"><b>1.</b> Carrito <small>Completado</small></span>
@@ -141,15 +144,15 @@
       <div class="checkout-layout">
         <form class="checkout-form" id="formulario-pago" novalidate>
           <section class="checkout-panel" aria-labelledby="entrega-titulo">
-            <div class="checkout-panel-title"><span class="step-number step-green">1</span><div><h2 id="entrega-titulo">Entrega digital</h2><p>¿Dónde enviamos tus códigos?</p></div></div>
+            <div class="checkout-panel-title"><span class="step-number step-green">1</span><div><h2 id="entrega-titulo">Entrega digital</h2><p>Correo de contacto del pedido</p></div></div>
             <label for="correo-entrega">Correo electrónico <span aria-hidden="true">*</span></label>
             <div class="input-with-icon"><svg class="icon" aria-hidden="true"><use href="#icon-mail"/></svg><input id="correo-entrega" name="email" type="email" autocomplete="email" placeholder="nombre@correo.com" required aria-describedby="ayuda-correo error-correo"></div>
-            <p class="field-help" id="ayuda-correo">Enviaremos los códigos de cada juego y el recibo de compra a este correo.</p>
+            <p class="field-help" id="ayuda-correo">El correo se guardará con el pedido. Las claves ficticias se muestran al confirmar; esta demo no envía correos.</p>
             <p class="field-error" id="error-correo" aria-live="polite"></p>
           </section>
 
           <section class="checkout-panel" aria-labelledby="pago-titulo">
-            <div class="checkout-panel-title"><span class="step-number">2</span><div><h2 id="pago-titulo">Método de pago</h2><p>Tu información está cifrada de extremo a extremo.</p></div></div>
+            <div class="checkout-panel-title"><span class="step-number">2</span><div><h2 id="pago-titulo">Método de pago</h2><p>Simulación académica: no se realizan cobros.</p></div></div>
             <div class="payment-options" role="radiogroup" aria-label="Selecciona un método de pago">
               <label class="payment-option is-selected"><input type="radio" name="metodo" value="tarjeta" checked><span class="radio-mark"></span><svg class="icon" aria-hidden="true"><use href="#icon-card"/></svg><span><b>Tarjeta de crédito</b><small>Visa, Mastercard y Amex</small></span><em>Seleccionado</em></label>
               <label class="payment-option"><input type="radio" name="metodo" value="paypal"><span class="radio-mark"></span><span class="paypal-mark" aria-hidden="true">PayPal</span><span><b>PayPal</b><small>Paga con tu cuenta</small></span></label>
@@ -193,7 +196,7 @@
           <h1 id="cuenta-titulo" tabindex="-1">Tu colección comienza aquí</h1>
           <p>Inicia sesión para completar tus datos más rápido y consultar tu actividad de demostración.</p>
           <ul><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Conserva tu carrito</li><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Revisa tus compras demo</li><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Acceso rápido al checkout</li></ul>
-          <div class="demo-credentials"><strong>Cuenta de prueba</strong><span>demo@gamevault.com</span><span>Contraseña: GameVault123</span><button class="text-button" id="usar-cuenta-prueba" type="button">Completar credenciales</button></div>
+
         </aside>
 
         <div class="auth-card">
@@ -202,7 +205,7 @@
             <button id="tab-registro" role="tab" aria-selected="false" aria-controls="panel-registro" tabindex="-1" type="button">Registrarse</button>
           </div>
           <section id="panel-login" role="tabpanel" aria-labelledby="tab-login">
-            <h2>Bienvenido de nuevo</h2><p>Ingresa con tu cuenta de demostración.</p>
+            <h2>Bienvenido de nuevo</h2><p>Ingresa con tu cuenta de GameVault.</p>
             <form id="formulario-login" class="auth-form" novalidate>
               <label for="login-email">Correo electrónico</label><input id="login-email" name="email" type="email" autocomplete="email" required placeholder="nombre@correo.com" aria-describedby="error-login-email">
               <p class="field-error" id="error-login-email" aria-live="polite"></p>
@@ -214,17 +217,17 @@
             <p class="auth-switch">¿Aún no tienes cuenta? <button type="button" data-auth-tab="registro">Crear una cuenta</button></p>
           </section>
           <section id="panel-registro" role="tabpanel" aria-labelledby="tab-registro" hidden>
-            <h2>Crea tu cuenta</h2><p>Este registro es local y solo sirve para probar la interfaz.</p>
+            <h2>Crea tu cuenta</h2><p>Tu cuenta se guardará en Supabase. Confirma tu correo para poder iniciar sesión.</p>
             <form id="formulario-registro" class="auth-form" novalidate>
               <label for="registro-nombre">Nombre visible</label><input id="registro-nombre" name="name" autocomplete="name" minlength="2" maxlength="50" required placeholder="Tu nombre" aria-describedby="error-registro-nombre">
               <p class="field-error" id="error-registro-nombre" aria-live="polite"></p>
               <label for="registro-email">Correo electrónico</label><input id="registro-email" name="email" type="email" autocomplete="email" required placeholder="nombre@correo.com" aria-describedby="error-registro-email">
               <p class="field-error" id="error-registro-email" aria-live="polite"></p>
-              <label for="registro-clave">Contraseña de demostración</label><div class="password-field"><input id="registro-clave" name="password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="ayuda-registro-clave error-registro-clave"><button type="button" data-toggle-password="registro-clave" aria-pressed="false">Mostrar</button></div>
+              <label for="registro-clave">Contraseña</label><div class="password-field"><input id="registro-clave" name="password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="ayuda-registro-clave error-registro-clave"><button type="button" data-toggle-password="registro-clave" aria-pressed="false">Mostrar</button></div>
               <p class="field-help" id="ayuda-registro-clave">Mínimo 8 caracteres, con al menos una letra y un número. No uses una contraseña real.</p><p class="field-error" id="error-registro-clave" aria-live="polite"></p>
               <label for="registro-confirmar">Confirmar contraseña</label><div class="password-field"><input id="registro-confirmar" name="password-confirmation" type="password" autocomplete="new-password" required aria-describedby="error-registro-confirmar"><button type="button" data-toggle-password="registro-confirmar" aria-pressed="false">Mostrar</button></div>
               <p class="field-error" id="error-registro-confirmar" aria-live="polite"></p>
-              <label class="auth-consent"><input id="registro-condiciones" type="checkbox" required> Entiendo que esta es una cuenta local de demostración y no usaré datos sensibles.</label>
+              <label class="auth-consent"><input id="registro-condiciones" type="checkbox" required> Entiendo que este es un proyecto académico y no usaré datos sensibles.</label>
               <p class="field-error" id="error-registro-condiciones" aria-live="polite"></p>
               <button class="button button-primary auth-submit" type="submit">Crear cuenta</button>
               <p class="auth-status" id="estado-registro" role="alert" hidden></p>
@@ -239,11 +242,12 @@
       <nav class="breadcrumbs" aria-label="Ruta de navegación"><button type="button" data-show-store>Tienda</button><span aria-hidden="true">›</span><span aria-current="page">Mi perfil</span></nav>
       <div class="profile-heading"><div><p class="eyebrow">MI CUENTA</p><h1 id="perfil-titulo" tabindex="-1">Perfil</h1><p>Consulta tu información y accesos rápidos.</p></div><button class="button button-secondary" id="cerrar-sesion" type="button">Cerrar sesión</button></div>
       <div class="profile-layout">
-        <section class="profile-card" aria-labelledby="datos-perfil-titulo"><div class="profile-avatar" id="perfil-iniciales" aria-hidden="true">AG</div><div><span class="profile-state"><span aria-hidden="true"></span> Sesión activa</span><h2 id="datos-perfil-titulo"><span id="perfil-nombre">Alex Gamer</span></h2><p id="perfil-email">demo@gamevault.com</p><span class="profile-type" id="perfil-tipo">Cuenta de prueba</span></div></section>
+        <section class="profile-card" aria-labelledby="datos-perfil-titulo"><div class="profile-avatar" id="perfil-iniciales" aria-hidden="true">AG</div><div><span class="profile-state"><span aria-hidden="true"></span> Sesión activa</span><h2 id="datos-perfil-titulo"><span id="perfil-nombre">Jugador</span></h2><p id="perfil-email"></p><span class="profile-type" id="perfil-tipo">Cliente</span></div></section>
         <section class="profile-details" aria-labelledby="resumen-perfil-titulo"><h2 id="resumen-perfil-titulo">Resumen de la cuenta</h2><dl><div><dt>Miembro desde</dt><dd id="perfil-creado">Octubre de 2026</dd></div><div><dt>Compras de demostración</dt><dd id="perfil-pedidos">0</dd></div><div><dt>Juegos en el carrito</dt><dd id="perfil-carrito">0</dd></div></dl></section>
         <section class="profile-actions" aria-labelledby="accesos-perfil-titulo"><h2 id="accesos-perfil-titulo">Accesos rápidos</h2><button class="button button-primary" type="button" data-profile-store>Explorar catálogo</button><button class="button button-secondary" type="button" data-open-cart>Ver carrito</button></section>
       </div>
-      <p class="profile-notice"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Perfil local de demostración. No contiene información de pago ni se sincroniza con un servidor.</p>
+      <section class="checkout-panel" aria-labelledby="historial-titulo"><h2 id="historial-titulo">Mis compras</h2><div id="historial-pedidos"></div></section>
+      <p class="profile-notice"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Perfil sincronizado con tu cuenta. Las compras son simuladas y las claves son ficticias.</p>
     </section>
 
     <section class="confirmation-view container" id="confirmacion" aria-labelledby="confirmacion-titulo" hidden>
