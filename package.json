@@ -1,0 +1,5 @@
+{
+  "name": "gamevault", "version": "2.0.0", "private": true,
+  "scripts": {"dev": "python -m http.server 5500", "test": "node test-e2e.cjs"},
+  "devDependencies": {"playwright": "1.62.1"}
+}

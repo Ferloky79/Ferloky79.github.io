@@ -1,26 +1,7 @@
 "use strict";
 
-/* DATOS QUEMADOS. Importes en centavos: evitan errores de coma flotante.
- * Los precios, valoraciones, regiones y stock son datos de la demo.
- * Las imágenes se guardan localmente para que también funcione sin internet.
- * Cada id identifica un producto/edición/plataforma, no una pantalla de Figma.
- */
-const videojuegos = [
-  { id: 1, titulo: "EA SPORTS FC 24", edicion: "Edición estándar", plataforma: "ps5", precioCentavos: 5999, precioAnteriorCentavos: 9999, valoracion: 4.6, imagen: "assets/fc24.jpg", region: "Global", disponible: true, descripcion: "Forma tu equipo y disfruta una nueva temporada de fútbol. Producto de ejemplo para PlayStation 5." },
-  { id: 2, titulo: "Alan Wake 2", edicion: "Edición estándar", plataforma: "xbox", precioCentavos: 5949, precioAnteriorCentavos: 6999, valoracion: 4.2, imagen: "assets/alan.jpg", region: "Global", disponible: true, descripcion: "Adéntrate en una historia de misterio, luz y oscuridad. Producto de ejemplo para Xbox Series X|S." },
-  { id: 3, titulo: "Mario Kart 8 Deluxe", edicion: "Edición estándar", plataforma: "switch", precioCentavos: 5999, precioAnteriorCentavos: null, valoracion: 4.9, imagen: "assets/mario.jpg", region: "Global", disponible: true, descripcion: "Compite con Mario y sus amigos en carreras llenas de diversión. Producto de ejemplo para Nintendo Switch." },
-  { id: 4, titulo: "Ghost of Tsushima", edicion: "Director’s Cut", plataforma: "ps5", precioCentavos: 5999, precioAnteriorCentavos: null, valoracion: 4.8, imagen: "assets/ghost.jpg", region: "Global", disponible: true, descripcion: "Explora Tsushima y descubre el camino de Jin Sakai. Producto de ejemplo para PlayStation 5." },
-  { id: 5, titulo: "Forza Motorsport", edicion: "Edición estándar", plataforma: "xbox", precioCentavos: 5999, precioAnteriorCentavos: 6999, valoracion: 4.5, imagen: "assets/forza.jpg", region: "Global", disponible: true, descripcion: "Vive la emoción de la pista. Elige tu coche, perfecciona cada curva y encuentra tu próximo desafío en Forza Motorsport." },
-  { id: 6, titulo: "Astro Bot", edicion: "Edición estándar", plataforma: "ps5", precioCentavos: 6999, precioAnteriorCentavos: null, valoracion: 4.9, imagen: "assets/AstroBot.jpg", region: "Global", disponible: true, descripcion: "Acompaña a Astro en una aventura de plataformas llena de mundos creativos y sorpresas. Producto de demostración para PlayStation 5." },
-  { id: 7, titulo: "God of War Ragnarök", edicion: "Edición estándar", plataforma: "ps5", precioCentavos: 4999, precioAnteriorCentavos: 6999, valoracion: 4.9, imagen: "assets/GodofWarRagnarok.avif", region: "Global", disponible: true, descripcion: "Kratos y Atreus viajan por los Nueve Reinos mientras se preparan para el Ragnarök. Producto de demostración para PlayStation 5." },
-  { id: 8, titulo: "Gran Turismo 7", edicion: "Edición estándar", plataforma: "ps5", precioCentavos: 5999, precioAnteriorCentavos: 6999, valoracion: 4.6, imagen: "assets/GranTurismo.jpg", region: "Global", disponible: true, descripcion: "Colecciona, personaliza y conduce una amplia selección de vehículos en circuitos emblemáticos. Producto de demostración para PlayStation 5." },
-  { id: 9, titulo: "Halo Infinite", edicion: "Campaña", plataforma: "xbox", precioCentavos: 3999, precioAnteriorCentavos: 5999, valoracion: 4.4, imagen: "assets/HaloInfinite.jpg", region: "Global", disponible: true, descripcion: "Enfrenta una nueva amenaza junto al Jefe Maestro en una campaña de ciencia ficción. Producto de demostración para Xbox Series X|S." },
-  { id: 10, titulo: "Forza Horizon 5", edicion: "Edición estándar", plataforma: "xbox", precioCentavos: 4999, precioAnteriorCentavos: 5999, valoracion: 4.8, imagen: "assets/ForzaHorizon.jpg", region: "Global", disponible: true, descripcion: "Explora un vibrante mundo abierto al volante de cientos de vehículos. Producto de demostración para Xbox Series X|S." },
-  { id: 11, titulo: "The Legend of Zelda: Tears of the Kingdom", edicion: "Edición estándar", plataforma: "switch", precioCentavos: 6999, precioAnteriorCentavos: null, valoracion: 4.9, imagen: "assets/TheLegendOfZelda.jpg", region: "Global", disponible: true, descripcion: "Recorre Hyrule y sus islas celestes usando nuevas habilidades para construir y explorar. Producto de demostración para Nintendo Switch." },
-  { id: 12, titulo: "Super Mario Odyssey", edicion: "Edición estándar", plataforma: "switch", precioCentavos: 4999, precioAnteriorCentavos: 5999, valoracion: 4.8, imagen: "assets/MarioOdyssey.jpg", region: "Global", disponible: true, descripcion: "Viaja por reinos sorprendentes con Mario y Cappy para rescatar a la princesa Peach. Producto de demostración para Nintendo Switch." },
-  { id: 13, titulo: "Marvel’s Wolverine", edicion: "Edición estándar", plataforma: "ps5", precioCentavos: 6999, precioAnteriorCentavos: null, valoracion: 4.7, imagen: "assets/Wolverine.jpg", region: "Global", disponible: true, descripcion: "Vive una aventura de acción protagonizada por Wolverine. Producto ficticio de demostración para PlayStation 5." }
-];
-
+// Catálogo y cuentas servidos por Supabase; sin datos comerciales locales.
+const api = window.GameVaultAPI;
 const plataformas = {
   ps5: { nombre: "PlayStation 5", etiqueta: "PS5" },
   xbox: { nombre: "Xbox Series X|S", etiqueta: "XBOX" },
@@ -28,26 +9,31 @@ const plataformas = {
 };
 const moneda = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 const estado = { busqueda: "", plataforma: "todos", orden: "destacados", seleccion: new Set(), ultimaAccion: null };
-const CLAVE_CARRITO = "gamevault:carrito";
-const CLAVE_SESION = "gamevault:sesion";
-const CLAVE_CUENTA_TEMPORAL = "gamevault:cuenta-temporal";
-const USUARIO_PRUEBA = { nombre: "Alex Gamer", email: "demo@gamevault.com", clave: "GameVault123", creado: "Octubre de 2026", pedidos: 0, tipo: "Cuenta de prueba" };
+const CLAVE_CARRITO = "gamevault:carrito-invitado";
+let colaCarrito = Promise.resolve();
+let cargandoCuenta = false;
+let cambiandoSesion = false;
+let historialPedidos = [];
+let compraEnCurso = false;
+let solicitudCompra = null;
+let firmaCompra = null;
 let catalogo = [];
 let origenDialogo = null;
 let origenCarrito = null;
 let ultimoPedido = null;
 let usuarioActual = null;
-let cuentaRegistrada = null;
+
 const $ = (id) => document.getElementById(id);
 
-/** Sustituye solamente este adaptador para conectarte con tu API.
- * Ejemplo futuro (normaliza la respuesta al formato de videojuegos):
- * const respuesta = await fetch('/api/videojuegos');
- * if (!respuesta.ok) throw new Error('No se pudo cargar el catálogo');
- * return await respuesta.json();
- * La API y el servidor deberán validar disponibilidad y precios al comprar.
- */
-async function obtenerVideojuegos() { return videojuegos; }
+async function obtenerVideojuegos() { return api.catalogo(); }
+function mensajeError(error) {
+  if (/invalid login/i.test(error.message)) return "El correo o la contraseña no coinciden.";
+  if (/email not confirmed/i.test(error.message)) return "Confirma tu correo antes de iniciar sesión.";
+  if (/fetch|network/i.test(error.message)) return "No hay conexión con Supabase. Comprueba internet y vuelve a intentar.";
+  if (/rate limit/i.test(error.message)) return "Demasiados intentos. Espera un momento antes de volver a intentar.";
+  return error.message || "No pudimos completar la operación. Intenta de nuevo.";
+}
+function claveCarritoLocal() { return usuarioActual ? `gamevault:carrito:${usuarioActual.id}` : CLAVE_CARRITO; }
 
 function elemento(etiqueta, clase, texto) {
   const nodo = document.createElement(etiqueta);
@@ -219,6 +205,7 @@ function agregarAlCarrito(id) {
 function actualizarBotonesAgregar() {
   document.querySelectorAll("[data-add]").forEach((boton) => {
     const juego = catalogo.find((item) => item.id === Number(boton.dataset.add));
+    if (!juego) return;
     const seleccionado = estado.seleccion.has(juego.id);
     // Es una acción de agregar, no un toggle: el estado queda en su nombre.
     boton.setAttribute("aria-label", seleccionado ? `${juego.titulo} ya está en el carrito` : `Agregar ${juego.titulo} al carrito`);
@@ -242,13 +229,23 @@ function actualizarSeleccion() {
 }
 
 function guardarCarrito() {
-  try { localStorage.setItem(CLAVE_CARRITO, JSON.stringify([...estado.seleccion])); }
-  catch (error) { console.warn("No se pudo guardar el carrito:", error); }
+  try { localStorage.setItem(claveCarritoLocal(), JSON.stringify([...estado.seleccion])); }
+  catch (error) { console.warn("No se pudo guardar el carrito en este navegador."); }
+  if (!usuarioActual || cargandoCuenta) return;
+  const idCuenta = usuarioActual.id;
+  const ids = [...estado.seleccion];
+  colaCarrito = colaCarrito.catch(() => {}).then(async () => {
+    if (usuarioActual?.id !== idCuenta) return;
+    try { await api.guardarCarrito(ids); }
+    catch (error) { avisar("No se sincronizó el carrito: " + mensajeError(error)); throw error; }
+  });
+  // Evita rechazos sin manejar; el checkout vuelve a comprobar esta cola.
+  colaCarrito.catch(() => {});
 }
 
 function restaurarCarrito() {
   try {
-    const guardado = JSON.parse(localStorage.getItem(CLAVE_CARRITO) || "[]");
+    const guardado = JSON.parse(localStorage.getItem(claveCarritoLocal()) || "[]");
     if (!Array.isArray(guardado)) return;
     estado.seleccion = new Set(guardado.filter((id) => Number.isSafeInteger(id) && catalogo.some((juego) => juego.id === id && juego.disponible)));
   } catch (error) {
@@ -438,17 +435,12 @@ function validarCheckout() {
   return $("formulario-pago").checkValidity();
 }
 
-function codigoDigital(juego) {
-  const plataforma = plataformas[juego.plataforma].etiqueta.replace(/[^A-Z]/g, "").slice(0, 4);
-  return `GV-${plataforma}-${String(juego.id).padStart(4, "0")}-${(juego.id * 7919).toString(16).toUpperCase().padStart(4, "0")}-DEMO`;
-}
-
 function crearJuegoEntregado(juego) {
   const bloque = elemento("section", "delivered-game");
   const datos = elemento("div");
   const etiqueta = elemento("span", "delivered-tag", `${plataformas[juego.plataforma].etiqueta} · Entregado`);
   datos.append(etiqueta, elemento("h2", "", juego.titulo), elemento("p", "", `${juego.edicion} para ${plataformas[juego.plataforma].nombre}`));
-  const codigo = codigoDigital(juego);
+  const codigo = juego.codigo;
   const caja = elemento("div", "digital-code");
   caja.append(elemento("span", "", codigo));
   const copiar = elemento("button", "icon-button");
@@ -464,34 +456,53 @@ function crearJuegoEntregado(juego) {
   return bloque;
 }
 
-function finalizarCompra() {
-  const juegos = obtenerJuegosCarrito();
-  const { subtotal } = calcularTotales(juegos);
-  const metodo = document.querySelector('input[name="metodo"]:checked').value;
-  const ultimos = $("numero-tarjeta").value.replace(/\D/g, "").slice(-4);
-  ultimoPedido = {
-    juegos: juegos.map((juego) => ({ ...juego })),
-    total: subtotal,
-    email: $("correo-entrega").value.trim(),
-    metodo: metodo === "paypal" ? "PayPal (demo)" : `Visa demo •••• ${ultimos}`,
-    numero: `#GV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`
-  };
-  $("juegos-entregados").replaceChildren(...ultimoPedido.juegos.map(crearJuegoEntregado));
-  $("confirmacion-mensaje").textContent = `Los códigos simulados también se enviarían a ${ultimoPedido.email}.`;
-  $("numero-pedido").textContent = ultimoPedido.numero;
-  $("confirmacion-total").textContent = formatoPrecio(ultimoPedido.total);
-  $("confirmacion-metodo").textContent = ultimoPedido.metodo;
-  if (usuarioActual) {
-    usuarioActual.pedidos = (usuarioActual.pedidos || 0) + 1;
-    guardarSesion();
-    renderizarPerfil();
-  }
-  estado.seleccion.clear();
-  estado.ultimaAccion = null;
-  actualizarSeleccion();
-  $("formulario-pago").reset();
-  actualizarMetodoPago();
+function renderizarConfirmacion(pedido) {
+  ultimoPedido = pedido;
+  $("juegos-entregados").replaceChildren(...pedido.juegos.map(crearJuegoEntregado));
+  $("confirmacion-mensaje").textContent = `Compra demo registrada para ${pedido.email}. Copia tus claves ficticias aquí; no se envían correos ni se realizan cobros.`;
+  $("numero-pedido").textContent = pedido.numero;
+  $("confirmacion-total").textContent = formatoPrecio(pedido.total);
+  $("confirmacion-metodo").textContent = pedido.metodo;
   mostrarVista("confirmacion");
+}
+async function finalizarCompra() {
+  if (compraEnCurso || !estado.seleccion.size) return;
+  compraEnCurso = true;
+  $("pagar").disabled = true;
+  $("pagar").setAttribute("aria-busy", "true");
+  try {
+    await colaCarrito;
+    const ids = [...estado.seleccion].sort((a,b) => a-b);
+    const datos = { p_ids: ids, p_correo: $("correo-entrega").value.trim(),
+      p_metodo: document.querySelector('input[name="metodo"]:checked').value,
+      p_total: calcularTotales(obtenerJuegosCarrito()).subtotal };
+    const firma = JSON.stringify([usuarioActual?.id || null, datos]);
+    if (!solicitudCompra || firmaCompra !== firma) {
+      solicitudCompra = { ...datos, p_id: crypto.randomUUID(), p_comprobante: crypto.randomUUID() + crypto.randomUUID() };
+      firmaCompra = firma;
+      // Se conserva ANTES de enviar, para recuperar un resultado si se corta la red.
+      sessionStorage.setItem('gamevault:compra-pendiente', JSON.stringify(solicitudCompra));
+    }
+    const pedido = await api.comprar(solicitudCompra);
+    sessionStorage.setItem('gamevault:ultimo-comprobante', JSON.stringify({ id: pedido.id, token: solicitudCompra.p_comprobante }));
+    sessionStorage.removeItem('gamevault:compra-pendiente');
+    solicitudCompra = null; firmaCompra = null;
+    estado.seleccion.clear(); estado.ultimaAccion = null;
+    actualizarSeleccion();
+    $("formulario-pago").reset(); actualizarMetodoPago();
+    renderizarConfirmacion(pedido);
+    // La compra ya terminó: un fallo al refrescar no debe invitar a comprar de nuevo.
+    try {
+      catalogo = await obtenerVideojuegos(); renderizarCatalogo();
+      if (usuarioActual) await cargarCuenta((await api.sesion())?.user, false);
+    } catch (error) { avisar("Compra guardada. No se pudo actualizar el catálogo o el perfil; recarga para verlos."); }
+  } catch (error) {
+    $("error-formulario").textContent = mensajeError(error);
+    $("error-formulario").hidden = false;
+  } finally {
+    compraEnCurso = false; $("pagar").disabled = !estado.seleccion.size;
+    $("pagar").removeAttribute("aria-busy");
+  }
 }
 function quitarDeSeleccion(id) {
   const juego = catalogo.find((item) => item.id === id);
@@ -534,27 +545,26 @@ function deshacerUltimaAccion() {
   if ($("carrito-dialogo").open) avisarCarrito(mensaje);
 }
 
-function guardarSesion() {
+async function cargarCuenta(user, fusionarInvitado = false) {
+  cargandoCuenta = true;
   try {
-    if (usuarioActual) localStorage.setItem(CLAVE_SESION, JSON.stringify(usuarioActual));
-    else localStorage.removeItem(CLAVE_SESION);
-  } catch (error) { console.warn("No se pudo guardar la sesión de demostración:", error); }
-}
-
-function restaurarSesion() {
-  try {
-    const guardada = JSON.parse(localStorage.getItem(CLAVE_SESION) || "null");
-    if (guardada && typeof guardada.nombre === "string" && typeof guardada.email === "string") {
-      usuarioActual = { nombre: guardada.nombre.slice(0, 50), email: guardada.email.slice(0, 100), creado: guardada.creado || "Octubre de 2026", pedidos: Number.isSafeInteger(guardada.pedidos) ? guardada.pedidos : 0, tipo: guardada.tipo || "Cuenta local" };
+    if (!user) { usuarioActual = null; historialPedidos = []; estado.seleccion.clear(); restaurarCarrito(); }
+    else {
+      const [perfil, pedidos, ids] = await Promise.all([api.perfil(user.id), api.pedidos(), api.carrito()]);
+      if (!perfil.activo) throw new Error("Tu cuenta está inactiva.");
+      const invitado = fusionarInvitado && !usuarioActual ? [...estado.seleccion] : [];
+      usuarioActual = { id: user.id, nombre: perfil.nombre, email: user.email,
+        creado: new Intl.DateTimeFormat('es-EC', { month: 'long', year: 'numeric' }).format(new Date(perfil.creado_en)),
+        pedidos: pedidos.filter(p => p.estado === 'ENTREGADO').length, tipo: perfil.rol?.nombre === 'ADMIN' ? 'Administrador' : 'Cliente' };
+      historialPedidos = pedidos;
+      estado.seleccion = new Set([...ids, ...invitado].filter(id => catalogo.some(j => j.id === id && j.disponible)));
+      if (fusionarInvitado) {
+        await api.guardarCarrito([...estado.seleccion]);
+        localStorage.removeItem(CLAVE_CARRITO);
+      }
     }
-  } catch (error) { console.warn("No se pudo restaurar la sesión de demostración:", error); }
-}
-
-function restaurarCuentaTemporal() {
-  try {
-    const guardada = JSON.parse(sessionStorage.getItem(CLAVE_CUENTA_TEMPORAL) || "null");
-    if (guardada && typeof guardada.nombre === "string" && typeof guardada.email === "string" && typeof guardada.clave === "string") cuentaRegistrada = guardada;
-  } catch (error) { console.warn("No se pudo restaurar la cuenta temporal:", error); }
+    actualizarCuentaUI(); renderizarPerfil();
+  } finally { cargandoCuenta = false; }
 }
 
 function iniciales(nombre) {
@@ -577,6 +587,20 @@ function renderizarPerfil() {
   $("perfil-creado").textContent = usuarioActual.creado;
   $("perfil-pedidos").textContent = String(usuarioActual.pedidos || 0);
   $("perfil-carrito").textContent = String(estado.seleccion.size);
+  const lista = $("historial-pedidos");
+  lista.replaceChildren();
+  if (!historialPedidos.length) lista.append(elemento("p", "", "Todavía no tienes compras."));
+  historialPedidos.forEach(pedido => {
+    const boton = elemento("button", "button button-secondary", `${pedido.numero} · ${formatoPrecio(pedido.total_centavos)} · ${pedido.estado}`);
+    boton.type = "button";
+    boton.addEventListener("click", async () => {
+      boton.disabled = true;
+      try { renderizarConfirmacion(await api.pedido(pedido.id_pedido)); }
+      catch (error) { avisar(mensajeError(error)); }
+      finally { boton.disabled = false; cambiandoSesion = false; }
+    });
+    lista.append(boton);
+  });
 }
 
 function seleccionarAuthTab(tab, enfocar = false) {
@@ -607,71 +631,51 @@ function marcarCampo(campo, errorId, valido, mensaje) {
   return valido;
 }
 
-function iniciarSesionDemo() {
-  const email = $("login-email").value.trim().toLocaleLowerCase("es");
-  const clave = $("login-clave").value;
-  const emailValido = $("login-email").validity.valid;
-  const claveValida = clave.length > 0;
-  marcarCampo($("login-email"), "error-login-email", emailValido, "Escribe un correo electrónico válido.");
-  marcarCampo($("login-clave"), "error-login-clave", claveValida, "Escribe tu contraseña.");
-  if (!emailValido || !claveValida) return false;
-  const coincidePrueba = email === USUARIO_PRUEBA.email && clave === USUARIO_PRUEBA.clave;
-  const coincideRegistro = cuentaRegistrada && email === cuentaRegistrada.email && clave === cuentaRegistrada.clave;
-  if (!coincidePrueba && !coincideRegistro) {
-    $("estado-login").textContent = "El correo o la contraseña no coinciden. Puedes usar la cuenta de prueba indicada a la izquierda.";
-    $("estado-login").classList.remove("is-success");
-    $("estado-login").hidden = false;
-    return false;
-  }
-  const origen = coincidePrueba ? USUARIO_PRUEBA : cuentaRegistrada;
-  usuarioActual = { nombre: origen.nombre, email: origen.email, creado: origen.creado, pedidos: origen.pedidos || 0, tipo: origen.tipo };
-  guardarSesion();
-  actualizarCuentaUI();
-  renderizarPerfil();
-  $("formulario-login").reset();
-  $("estado-login").hidden = true;
-  mostrarVista("perfil");
-  return true;
+async function iniciarSesion() {
+  const form = $("formulario-login"), boton = form.querySelector('[type="submit"]');
+  if (!form.reportValidity()) return;
+  boton.disabled = true; cambiandoSesion = true;
+  try {
+    await colaCarrito.catch(() => {});
+    const { user } = await api.login($("login-email").value.trim(), $("login-clave").value);
+    await cargarCuenta(user, true); actualizarSeleccion();
+    form.reset(); $("estado-login").hidden = true; mostrarVista("perfil");
+  } catch (error) { $("estado-login").textContent = mensajeError(error); $("estado-login").classList.remove("is-success"); $("estado-login").hidden = false; }
+  finally { boton.disabled = false; cambiandoSesion = false; }
 }
-
-function registrarCuentaDemo() {
-  const nombre = $("registro-nombre").value.trim();
-  const email = $("registro-email").value.trim().toLocaleLowerCase("es");
+async function registrarCuenta() {
+  const form = $("formulario-registro"), boton = form.querySelector('[type="submit"]');
+  if (!form.reportValidity()) return;
   const clave = $("registro-clave").value;
-  const confirmacion = $("registro-confirmar").value;
-  const nombreValido = nombre.length >= 2;
-  const emailValido = $("registro-email").validity.valid && email !== USUARIO_PRUEBA.email;
-  const claveValida = clave.length >= 8 && /[a-záéíóúñ]/i.test(clave) && /\d/.test(clave);
-  const confirmacionValida = confirmacion === clave && confirmacion.length > 0;
-  const condicionesValidas = $("registro-condiciones").checked;
-  marcarCampo($("registro-nombre"), "error-registro-nombre", nombreValido, "Escribe al menos 2 caracteres.");
-  marcarCampo($("registro-email"), "error-registro-email", emailValido, email === USUARIO_PRUEBA.email ? "Ese correo pertenece a la cuenta de prueba. Inicia sesión con ella." : "Escribe un correo electrónico válido.");
-  marcarCampo($("registro-clave"), "error-registro-clave", claveValida, "Usa al menos 8 caracteres, una letra y un número.");
-  marcarCampo($("registro-confirmar"), "error-registro-confirmar", confirmacionValida, "Las contraseñas no coinciden.");
-  $("error-registro-condiciones").textContent = condicionesValidas ? "" : "Confirma que entiendes el alcance de la demostración.";
-  if (!nombreValido || !emailValido || !claveValida || !confirmacionValida || !condicionesValidas) return false;
-  const creado = new Intl.DateTimeFormat("es-EC", { month: "long", year: "numeric" }).format(new Date());
-  cuentaRegistrada = { nombre, email, clave, creado, pedidos: 0, tipo: "Cuenta local" };
-  try { sessionStorage.setItem(CLAVE_CUENTA_TEMPORAL, JSON.stringify(cuentaRegistrada)); }
-  catch (error) { console.warn("No se pudo conservar la cuenta temporal:", error); }
-  usuarioActual = { nombre, email, creado, pedidos: 0, tipo: "Cuenta local" };
-  guardarSesion();
-  actualizarCuentaUI();
-  renderizarPerfil();
-  $("formulario-registro").reset();
-  mostrarVista("perfil");
-  return true;
+  const valida = clave.length >= 8 && /[a-z]/i.test(clave) && /\d/.test(clave);
+  const igual = clave === $("registro-confirmar").value;
+  marcarCampo($("registro-clave"),"error-registro-clave",valida,"Usa al menos 8 caracteres, una letra y un número.");
+  marcarCampo($("registro-confirmar"),"error-registro-confirmar",igual,"Las contraseñas no coinciden.");
+  if (!valida || !igual) return;
+  boton.disabled = true; cambiandoSesion = true;
+  try {
+    const { user, session } = await api.registro($("registro-nombre").value.trim(), $("registro-email").value.trim(), clave);
+    form.reset();
+    if (session) { await cargarCuenta(user,true); actualizarSeleccion(); mostrarVista("perfil"); }
+    else {
+      seleccionarAuthTab("login");
+      $("estado-login").textContent = "Revisa tu correo para confirmar la cuenta y después inicia sesión. Si ya tenías cuenta, usa tus credenciales.";
+      $("estado-login").classList.add("is-success"); $("estado-login").hidden = false;
+    }
+  } catch (error) { $("estado-registro").textContent = mensajeError(error); $("estado-registro").hidden = false; }
+  finally { boton.disabled = false; cambiandoSesion = false; }
 }
-
-function cerrarSesion() {
-  usuarioActual = null;
-  guardarSesion();
-  actualizarCuentaUI();
-  seleccionarAuthTab("login");
-  $("estado-login").textContent = "Sesión cerrada correctamente.";
-  $("estado-login").classList.add("is-success");
-  $("estado-login").hidden = false;
-  mostrarVista("cuenta");
+async function cerrarSesion() {
+  $("cerrar-sesion").disabled = true; cambiandoSesion = true;
+  try {
+    await colaCarrito.catch(() => {});
+    await api.salir(); await cargarCuenta(null); actualizarSeleccion();
+    $("correo-entrega").value = ""; $("juegos-entregados").replaceChildren(); ultimoPedido = null;
+    solicitudCompra = null; firmaCompra = null;
+    sessionStorage.removeItem('gamevault:ultimo-comprobante'); sessionStorage.removeItem('gamevault:compra-pendiente');
+    seleccionarAuthTab("login"); mostrarVista("cuenta");
+  } catch (error) { avisar(mensajeError(error)); }
+  finally { $("cerrar-sesion").disabled = false; cambiandoSesion = false; }
 }
 // Accesible desde otro script clásico o desde la consola para la siguiente etapa.
 window.agregarAlCarrito = agregarAlCarrito;
@@ -796,12 +800,6 @@ function conectarEventos() {
     finalizarCompra();
   });
   $("abrir-cuenta").addEventListener("click", mostrarCuenta);
-  $("usar-cuenta-prueba").addEventListener("click", () => {
-    seleccionarAuthTab("login");
-    $("login-email").value = USUARIO_PRUEBA.email;
-    $("login-clave").value = USUARIO_PRUEBA.clave;
-    $("login-email").focus();
-  });
   [["tab-login", "login"], ["tab-registro", "registro"]].forEach(([id, tab]) => $(id).addEventListener("click", () => seleccionarAuthTab(tab)));
   $("cuenta").querySelector(".auth-tabs").addEventListener("keydown", (evento) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(evento.key)) return;
@@ -819,11 +817,11 @@ function conectarEventos() {
   }));
   $("formulario-login").addEventListener("submit", (evento) => {
     evento.preventDefault();
-    if (!iniciarSesionDemo()) $("formulario-login").querySelector('[aria-invalid="true"]')?.focus();
+    void iniciarSesion();
   });
   $("formulario-registro").addEventListener("submit", (evento) => {
     evento.preventDefault();
-    if (!registrarCuentaDemo()) $("formulario-registro").querySelector('[aria-invalid="true"], input:invalid')?.focus();
+    void registrarCuenta();
   });
   $("cerrar-sesion").addEventListener("click", cerrarSesion);
   document.querySelectorAll("[data-profile-store]").forEach((control) => control.addEventListener("click", () => mostrarVista("tienda", "#catalogo")));
@@ -857,8 +855,12 @@ async function iniciar() {
   conectarEventos();
   document.body.dataset.view = "tienda";
   actualizarMetodoPago();
-  restaurarSesion();
-  restaurarCuentaTemporal();
+  // Retira las credenciales y sesiones de la demo anterior.
+  localStorage.removeItem('gamevault:sesion'); sessionStorage.removeItem('gamevault:cuenta-temporal');
+  if (!localStorage.getItem(CLAVE_CARRITO) && localStorage.getItem('gamevault:carrito')) {
+    localStorage.setItem(CLAVE_CARRITO, localStorage.getItem('gamevault:carrito'));
+    localStorage.removeItem('gamevault:carrito');
+  }
   actualizarCuentaUI();
   $("abrir-cuenta").disabled = false;
   try {
@@ -878,11 +880,16 @@ async function iniciar() {
     })) throw new Error("Formato de catálogo no válido");
     catalogo = datos;
     restaurarCarrito();
+    try { await cargarCuenta((await api.sesion())?.user); }
+    catch (error) { avisar("No pudimos recuperar tu cuenta: " + mensajeError(error)); }
     renderizarCatalogo();
     document.querySelectorAll("[data-platform], #ordenar, #abrir-carrito, #abrir-cuenta").forEach((control) => { control.disabled = false; });
-    const destacado = catalogo.find((juego) => juego.id === 5);
+    const destacado = catalogo.find((juego) => juego.id === 5) || catalogo[0];
     if (destacado) {
       $("hero-titulo").textContent = destacado.titulo;
+      document.querySelector('.hero-art img').src = destacado.imagen;
+      document.querySelector('.hero-art img').alt = `Portada de ${destacado.titulo}`;
+      document.querySelector('.hero-art figcaption').textContent = plataformas[destacado.plataforma].nombre + ' · Clave digital';
       $("hero-descripcion").textContent = destacado.descripcion;
       const precio = crearPrecio(destacado, "hero-price");
       precio.id = "hero-precio";
@@ -896,6 +903,36 @@ async function iniciar() {
     }
     $("anio").textContent = new Date().getFullYear();
     actualizarSeleccion();
+    // Recuperar una respuesta perdida; no vuelve a comprar automáticamente.
+    try {
+      const pendiente = JSON.parse(sessionStorage.getItem('gamevault:compra-pendiente') || 'null');
+      const ultimo = JSON.parse(sessionStorage.getItem('gamevault:ultimo-comprobante') || 'null');
+      const ref = pendiente ? { id: pendiente.p_id, token: pendiente.p_comprobante } : ultimo;
+      if (ref && location.hash === '#recuperar-pedido') renderizarConfirmacion(await api.pedido(ref.id,ref.token));
+      if (pendiente) {
+        const recuperar = elemento('button','button button-secondary','Recuperar compra anterior');
+        recuperar.type = 'button';
+        recuperar.onclick = async () => {
+          try { renderizarConfirmacion(await api.pedido(ref.id,ref.token)); }
+          catch(error) { avisar('No se encontró una compra completada. Puedes volver al checkout; se conservará la misma solicitud.'); }
+        };
+        $('catalogo').prepend(recuperar);
+        solicitudCompra = pendiente;
+        firmaCompra = JSON.stringify([usuarioActual?.id || null, { p_ids: pendiente.p_ids, p_correo: pendiente.p_correo, p_metodo: pendiente.p_metodo, p_total: pendiente.p_total }]);
+      }
+    } catch (error) { avisar(mensajeError(error)); }
+    // No ejecutar consultas dentro del callback de Auth (puede bloquear el SDK).
+    api.onAuth((event, session) => {
+      if (cambiandoSesion || (session?.user?.id || null) === (usuarioActual?.id || null)) return;
+      setTimeout(async () => {
+        try {
+          await cargarCuenta(session?.user);
+          actualizarSeleccion();
+          $("juegos-entregados").replaceChildren(); ultimoPedido = null;
+          mostrarVista(session?.user ? 'perfil' : 'cuenta');
+        } catch(error) { avisar(mensajeError(error)); }
+      },0);
+    });
   } catch (error) {
     $("lista-juegos").setAttribute("aria-busy", "false");
     $("resultados").textContent = "No pudimos cargar el catálogo. Recarga la página para volver a intentarlo.";
