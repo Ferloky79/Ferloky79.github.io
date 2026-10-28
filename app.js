@@ -18,8 +18,6 @@ let compraEnCurso = false;
 let solicitudCompra = null;
 let firmaCompra = null;
 let catalogo = [];
-let origenDialogo = null;
-let origenCarrito = null;
 let ultimoPedido = null;
 let usuarioActual = null;
 
@@ -87,7 +85,6 @@ function crearTarjeta(juego) {
   portada.type = "button";
   portada.dataset.details = juego.id;
   portada.setAttribute("aria-label", `Ver detalles de ${juego.titulo}, ${juego.edicion}`);
-  portada.setAttribute("aria-haspopup", "dialog");
   portada.append(crearImagen(juego));
   if (descuento(juego)) portada.append(elemento("span", "discount", `−${descuento(juego)}%`));
 
@@ -109,7 +106,6 @@ function crearTarjeta(juego) {
   detalles.type = "button";
   detalles.dataset.details = juego.id;
   detalles.setAttribute("aria-label", `Ver detalles de ${juego.titulo}`);
-  detalles.setAttribute("aria-haspopup", "dialog");
   titulo.append(detalles);
 
   const pie = elemento("div", "card-bottom");
@@ -332,10 +328,20 @@ function renderizarCheckout() {
   if (!juegos.length) $("error-formulario").textContent = "Tu carrito está vacío. Vuelve al catálogo para agregar un juego.";
 }
 
-function mostrarVista(vista, destino = null) {
+function hashDeVista(vista, destino = null) {
+  if (vista === "tienda") return destino && destino.startsWith("#") ? destino : "#inicio";
+  if (vista === "detalle") return `#producto/${destino}`;
+  return `#${vista}`;
+}
+
+function mostrarVista(vista, destino = null, actualizarUrl = true) {
+  const hash = hashDeVista(vista, destino);
+  if (actualizarUrl && location.hash !== hash) history.pushState(null, "", hash);
   const enTienda = vista === "tienda";
   $("oferta").hidden = !enTienda;
   $("catalogo").hidden = !enTienda;
+  $("detalle").hidden = vista !== "detalle";
+  $("carrito").hidden = vista !== "carrito";
   $("checkout").hidden = vista !== "checkout";
   $("confirmacion").hidden = vista !== "confirmacion";
   $("cuenta").hidden = vista !== "cuenta";
@@ -343,10 +349,12 @@ function mostrarVista(vista, destino = null) {
   document.body.dataset.view = vista;
   requestAnimationFrame(() => {
     if (vista === "checkout") $("checkout-titulo").focus({ preventScroll: true });
+    if (vista === "detalle") $("detalle-titulo").focus({ preventScroll: true });
+    if (vista === "carrito") $("carrito-titulo").focus({ preventScroll: true });
     if (vista === "confirmacion") $("confirmacion-titulo").focus({ preventScroll: true });
     if (vista === "cuenta") $("cuenta-titulo").focus({ preventScroll: true });
     if (vista === "perfil") $("perfil-titulo").focus({ preventScroll: true });
-    const objetivo = destino && document.querySelector(destino);
+    const objetivo = enTienda && destino && document.querySelector(destino);
     (objetivo || $("contenido")).scrollIntoView({ block: "start" });
   });
 }
@@ -354,16 +362,13 @@ function mostrarVista(vista, destino = null) {
 function abrirCheckout() {
   if (!estado.seleccion.size) return;
   renderizarCheckout();
-  $("carrito-dialogo").close();
   mostrarVista("checkout");
 }
 
 function abrirCarritoDialogo() {
-  origenCarrito = document.activeElement;
   renderizarCarrito();
   $("carrito-feedback").hidden = true;
-  $("carrito-dialogo").showModal();
-  $("carrito-titulo").focus();
+  mostrarVista("carrito");
 }
 
 function actualizarMetodoPago() {
@@ -511,7 +516,7 @@ function quitarDeSeleccion(id) {
   actualizarSeleccion();
   const mensaje = `${juego.titulo} fue quitado del carrito.`;
   avisar(mensaje, true);
-  if ($("carrito-dialogo").open) avisarCarrito(mensaje, true);
+  if (document.body.dataset.view === "carrito") avisarCarrito(mensaje, true);
   document.dispatchEvent(new CustomEvent("carrito:quitar", { detail: { id } }));
 }
 
@@ -542,7 +547,7 @@ function deshacerUltimaAccion() {
   });
   const mensaje = accion.tipo === "agregar" ? "Se deshizo la adición al carrito." : accion.tipo === "vaciar" ? "Se restauraron los juegos del carrito." : "El juego volvió al carrito.";
   avisar(mensaje);
-  if ($("carrito-dialogo").open) avisarCarrito(mensaje);
+  if (document.body.dataset.view === "carrito") avisarCarrito(mensaje);
 }
 
 async function cargarCuenta(user, fusionarInvitado = false) {
@@ -681,17 +686,14 @@ async function cerrarSesion() {
 window.agregarAlCarrito = agregarAlCarrito;
 
 function abrirDialogo(titulo, contenido) {
-  const dialogo = $("dialogo");
-  origenDialogo = document.activeElement;
-  $("dialogo-titulo").textContent = titulo;
-  $("dialogo-contenido").replaceChildren(contenido);
-  dialogo.showModal();
-  $("dialogo-titulo").focus();
+  $("detalle-titulo").textContent = titulo;
+  $("detalle-contenido").replaceChildren(contenido);
 }
 function mostrarDetalles(id) {
   const juego = catalogo.find((item) => item.id === Number(id));
   if (!juego) return;
-  const contenido = elemento("div");
+  const contenido = document.createDocumentFragment();
+  const copia = elemento("div", "product-copy");
   const datos = elemento("dl", "product-facts");
   [["Plataforma", plataformas[juego.plataforma].nombre], ["Edición", juego.edicion], ["Formato", "Clave digital"], ["Región", juego.region], ["Estado", juego.disponible ? "Disponible en la demo" : "No disponible"]].forEach(([nombre, valor]) => datos.append(elemento("dt", "", nombre), elemento("dd", "", valor)));
   const agregar = elemento("button", "button button-primary", "Agregar al carrito");
@@ -699,9 +701,37 @@ function mostrarDetalles(id) {
   agregar.dataset.add = juego.id;
   agregar.disabled = !juego.disponible;
   const aviso = elemento("p", "demo-note", "Datos de ejemplo. Verifica la plataforma y la región antes de una compra real.");
-  contenido.append(crearImagen(juego, "dialog-art"), elemento("p", "dialog-description", juego.descripcion), datos, crearPrecio(juego, "dialog-prices"), agregar, aviso);
+  copia.append(elemento("p", "dialog-description", juego.descripcion), datos, crearPrecio(juego, "dialog-prices"), agregar, aviso);
+  contenido.append(crearImagen(juego, "dialog-art"), copia);
   abrirDialogo(juego.titulo, contenido);
   actualizarBotonesAgregar();
+  mostrarVista("detalle", juego.id);
+}
+
+function aplicarRuta() {
+  if (!catalogo.length) return;
+  const ruta = decodeURIComponent(location.hash || "#inicio");
+  const producto = ruta.match(/^#producto\/(\d+)$/);
+  if (producto) {
+    const juego = catalogo.find((item) => item.id === Number(producto[1]));
+    if (juego) { mostrarDetalles(juego.id); return; }
+    history.replaceState(null, "", "#catalogo");
+    mostrarVista("tienda", "#catalogo", false);
+    return;
+  }
+  if (ruta === "#carrito") { renderizarCarrito(); mostrarVista("carrito", null, false); return; }
+  if (ruta === "#checkout") {
+    if (estado.seleccion.size) { renderizarCheckout(); mostrarVista("checkout", null, false); return; }
+    history.replaceState(null, "", "#carrito"); renderizarCarrito(); mostrarVista("carrito", null, false); return;
+  }
+  if (ruta === "#registro") { seleccionarAuthTab("registro"); mostrarVista("cuenta", null, false); return; }
+  if (ruta === "#cuenta") { seleccionarAuthTab("login"); mostrarVista(usuarioActual ? "perfil" : "cuenta", null, false); return; }
+  if (ruta === "#perfil") { mostrarVista(usuarioActual ? "perfil" : "cuenta", null, false); return; }
+  if (ruta === "#confirmacion" && ultimoPedido) { mostrarVista("confirmacion", null, false); return; }
+  const anclasTienda = new Set(["#inicio", "#catalogo", "#oferta", "#ayuda", "#canjear", "#reembolso", "#soporte"]);
+  const destino = anclasTienda.has(ruta) ? ruta : "#inicio";
+  if (destino !== ruta) history.replaceState(null, "", destino);
+  mostrarVista("tienda", destino, false);
 }
 function conectarEventos() {
   let temporizadorBusqueda;
@@ -739,8 +769,6 @@ function conectarEventos() {
     const boton = evento.target.closest("button[data-add], button[data-details], button[data-close], button[data-cart-remove]");
     if (!boton) return;
     if (boton.dataset.add) {
-      const enDialogo = boton.closest("dialog");
-      if (enDialogo) $("dialogo").close();
       agregarAlCarrito(boton.dataset.add);
     }
     if (boton.dataset.details) mostrarDetalles(boton.dataset.details);
@@ -748,15 +776,10 @@ function conectarEventos() {
       quitarDeSeleccion(Number(boton.dataset.cartRemove));
       $("carrito-titulo").focus();
     }
-    if (boton.dataset.close) $("dialogo").close();
   });
   $("abrir-carrito").addEventListener("click", abrirCarritoDialogo);
-  $("cerrar-carrito").addEventListener("click", () => $("carrito-dialogo").close());
-  $("cerrar-carrito-feedback").addEventListener("click", () => { $("carrito-feedback").hidden = true; $("cerrar-carrito").focus(); });
-  $("carrito-dialogo").addEventListener("close", () => { if (origenCarrito?.isConnected) origenCarrito.focus(); });
+  $("cerrar-carrito-feedback").addEventListener("click", () => { $("carrito-feedback").hidden = true; $("carrito-titulo").focus(); });
   $("explorar-juegos").addEventListener("click", () => {
-    $("carrito-dialogo").close();
-    mostrarVista("tienda", "#catalogo");
     requestAnimationFrame(() => $("buscar").focus({ preventScroll: true }));
   });
   $("vaciar-carrito").addEventListener("click", vaciarCarrito);
@@ -800,13 +823,20 @@ function conectarEventos() {
     finalizarCompra();
   });
   $("abrir-cuenta").addEventListener("click", mostrarCuenta);
-  [["tab-login", "login"], ["tab-registro", "registro"]].forEach(([id, tab]) => $(id).addEventListener("click", () => seleccionarAuthTab(tab)));
+  [["tab-login", "login"], ["tab-registro", "registro"]].forEach(([id, tab]) => $(id).addEventListener("click", () => {
+    seleccionarAuthTab(tab);
+    const hash = tab === "registro" ? "#registro" : "#cuenta";
+    if (location.hash !== hash) history.pushState(null, "", hash);
+  }));
   $("cuenta").querySelector(".auth-tabs").addEventListener("keydown", (evento) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(evento.key)) return;
     evento.preventDefault();
     seleccionarAuthTab(evento.key === "ArrowLeft" || evento.key === "Home" ? "login" : "registro", true);
   });
-  document.querySelectorAll("[data-auth-tab]").forEach((control) => control.addEventListener("click", () => seleccionarAuthTab(control.dataset.authTab, true)));
+  document.querySelectorAll("[data-auth-tab]").forEach((control) => control.addEventListener("click", () => {
+    seleccionarAuthTab(control.dataset.authTab, true);
+    history.pushState(null, "", control.dataset.authTab === "registro" ? "#registro" : "#cuenta");
+  }));
   document.querySelectorAll("[data-toggle-password]").forEach((control) => control.addEventListener("click", () => {
     const campo = $(control.dataset.togglePassword);
     const mostrar = campo.type === "password";
@@ -825,24 +855,10 @@ function conectarEventos() {
   });
   $("cerrar-sesion").addEventListener("click", cerrarSesion);
   document.querySelectorAll("[data-profile-store]").forEach((control) => control.addEventListener("click", () => mostrarVista("tienda", "#catalogo")));
-  $("cerrar-dialogo").addEventListener("click", () => $("dialogo").close());
-  $("dialogo").addEventListener("close", () => { if (origenDialogo?.isConnected) origenDialogo.focus(); });
+  addEventListener("hashchange", aplicarRuta);
+  addEventListener("popstate", aplicarRuta);
   // <dialog> gestiona Escape y el fondo inerte. Refuerza el ciclo de Tab
   // para conservar el foco en los controles del diálogo entre navegadores.
-  $("dialogo").addEventListener("keydown", (evento) => {
-    if (evento.key !== "Tab") return;
-    const controles = [...$("dialogo").querySelectorAll("button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled)")].filter((control) => control.getClientRects().length);
-    const primero = controles[0];
-    const ultimo = controles.at(-1);
-    if (!primero) return;
-    if (evento.shiftKey && (document.activeElement === primero || document.activeElement === $("dialogo-titulo"))) {
-      evento.preventDefault();
-      ultimo.focus();
-    } else if (!evento.shiftKey && document.activeElement === ultimo) {
-      evento.preventDefault();
-      primero.focus();
-    }
-  });
   $("deshacer").addEventListener("click", () => {
     deshacerUltimaAccion();
     $("abrir-carrito").focus();
@@ -853,7 +869,7 @@ function conectarEventos() {
 
 async function iniciar() {
   conectarEventos();
-  document.body.dataset.view = "tienda";
+  document.body.dataset.view = "cargando";
   actualizarMetodoPago();
   // Retira las credenciales y sesiones de la demo anterior.
   localStorage.removeItem('gamevault:sesion'); sessionStorage.removeItem('gamevault:cuenta-temporal');
@@ -921,6 +937,7 @@ async function iniciar() {
         firmaCompra = JSON.stringify([usuarioActual?.id || null, { p_ids: pendiente.p_ids, p_correo: pendiente.p_correo, p_metodo: pendiente.p_metodo, p_total: pendiente.p_total }]);
       }
     } catch (error) { avisar(mensajeError(error)); }
+    if (location.hash !== "#confirmacion") aplicarRuta();
     // No ejecutar consultas dentro del callback de Auth (puede bloquear el SDK).
     api.onAuth((event, session) => {
       if (cambiandoSesion || (session?.user?.id || null) === (usuarioActual?.id || null)) return;

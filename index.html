@@ -51,7 +51,7 @@
         <button type="submit" class="visually-hidden-focusable">Buscar</button>
       </form>
       <div class="header-actions">
-        <button class="icon-button cart-button" id="abrir-carrito" type="button" aria-label="Abrir carrito, 0 juegos" aria-haspopup="dialog" aria-controls="carrito-dialogo" disabled>
+        <button class="icon-button cart-button" id="abrir-carrito" type="button" aria-label="Abrir carrito, 0 juegos" aria-controls="carrito" disabled>
           <svg class="icon" aria-hidden="true"><use href="#icon-cart"/></svg>
           <span class="cart-count" id="contador-carrito" aria-hidden="true">0</span>
         </button>
@@ -72,7 +72,7 @@
           <div class="hero-price" id="hero-precio"></div>
           <div class="hero-actions">
             <button class="button button-primary" id="hero-agregar" type="button" disabled>Agregar al carrito</button>
-            <button class="button button-secondary" id="hero-detalles" type="button" aria-haspopup="dialog" disabled>Ver detalles</button>
+            <button class="button button-secondary" id="hero-detalles" type="button" disabled>Ver detalles</button>
           </div>
           <p class="demo-note">Proyecto académico · precios y disponibilidad de ejemplo</p>
         </div>
@@ -123,6 +123,45 @@
       </div>
       <noscript><p class="notice">Activa JavaScript para ver los juegos, buscar por título y usar el carrito. La ayuda y las preguntas frecuentes siguen disponibles.</p></noscript>
       <p class="catalog-hint">Abre una tarjeta para ver sus detalles. Precios en USD.</p>
+    </section>
+
+    <section class="product-view container" id="detalle" aria-labelledby="detalle-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación">
+        <a href="#inicio">Tienda</a><span aria-hidden="true">›</span>
+        <a href="#catalogo">Catálogo</a><span aria-hidden="true">›</span>
+        <span aria-current="page">Detalle del videojuego</span>
+      </nav>
+      <div class="product-view-heading">
+        <div><p class="eyebrow">DETALLE DEL VIDEOJUEGO</p><h1 id="detalle-titulo" tabindex="-1"></h1></div>
+        <a class="button button-secondary" href="#catalogo">Volver al catálogo</a>
+      </div>
+      <div class="product-view-content" id="detalle-contenido"></div>
+    </section>
+
+    <section class="cart-view container" id="carrito" aria-labelledby="carrito-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación">
+        <a href="#inicio">Tienda</a><span aria-hidden="true">›</span><span aria-current="page">Carrito de compras</span>
+      </nav>
+      <div class="cart-dialog-header">
+        <div><p class="eyebrow cart-eyebrow">TU COMPRA</p><h1 id="carrito-titulo" tabindex="-1">Carrito de compras</h1><p class="cart-item-count" id="carrito-cantidad">0 productos</p></div>
+        <a class="button button-secondary" href="#catalogo">Seguir comprando</a>
+      </div>
+      <div class="cart-action-feedback" id="carrito-feedback" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <p id="carrito-mensaje"></p><button class="text-button" id="carrito-deshacer" type="button">Deshacer</button><button class="icon-button" id="cerrar-carrito-feedback" type="button" aria-label="Cerrar aviso"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+      </div>
+      <div class="cart-layout">
+        <section class="cart-products" aria-labelledby="productos-carrito-titulo">
+          <div class="cart-section-heading"><h2 id="productos-carrito-titulo">Tus juegos</h2><button class="text-button cart-clear" id="vaciar-carrito" type="button" hidden>Vaciar carrito</button></div>
+          <div class="cart-empty" id="carrito-vacio"><span class="cart-empty-icon" aria-hidden="true"><svg class="icon"><use href="#icon-cart"/></svg></span><h2>Tu carrito está vacío</h2><p>Explora el catálogo y encuentra tu próxima aventura.</p><a class="button button-primary" href="#catalogo" id="explorar-juegos">Explorar juegos</a></div>
+          <ul class="cart-list" id="lista-carrito" aria-label="Productos en el carrito"></ul>
+        </section>
+        <aside class="cart-summary" id="resumen-carrito" aria-labelledby="resumen-titulo" hidden>
+          <h2 id="resumen-titulo">Resumen del pedido</h2>
+          <dl class="cart-totals"><div><dt>Subtotal</dt><dd id="carrito-subtotal">$0.00</dd></div><div id="fila-ahorro" hidden><dt>Ahorro</dt><dd class="cart-savings" id="carrito-ahorro">−$0.00</dd></div><div><dt>Entrega digital</dt><dd class="cart-free">Gratis</dd></div><div class="cart-total"><dt>Total</dt><dd id="carrito-total">$0.00 <small>USD</small></dd></div></dl>
+          <button class="button button-primary cart-checkout" id="continuar-pago" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg>Continuar al pago</button>
+          <p class="cart-secure"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Compra protegida y entrega digital</p><p class="cart-demo-note">Demo académica: no se realizará ningún cobro ni se entregarán claves reales.</p><p class="cart-checkout-message" id="mensaje-pago" role="status" aria-live="polite" hidden></p>
+        </aside>
+      </div>
     </section>
 
     <section class="checkout-view container" id="checkout" aria-labelledby="checkout-titulo" hidden>
@@ -295,54 +334,5 @@
   </footer>
 
 
-  <dialog id="dialogo" class="product-dialog" aria-labelledby="dialogo-titulo">
-    <div class="dialog-header"><h2 id="dialogo-titulo" tabindex="-1"></h2><button class="icon-button" id="cerrar-dialogo" type="button" aria-label="Cerrar ventana"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div>
-    <div id="dialogo-contenido"></div>
-  </dialog>
-
-  <dialog id="carrito-dialogo" class="cart-dialog" aria-labelledby="carrito-titulo">
-    <div class="cart-dialog-header">
-      <div>
-        <p class="eyebrow cart-eyebrow">TU COMPRA</p>
-        <h2 id="carrito-titulo" tabindex="-1">Carrito de compras</h2>
-        <p class="cart-item-count" id="carrito-cantidad">0 productos</p>
-      </div>
-      <button class="icon-button" id="cerrar-carrito" type="button" aria-label="Cerrar carrito"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
-    </div>
-
-    <div class="cart-action-feedback" id="carrito-feedback" role="status" aria-live="polite" aria-atomic="true" hidden>
-      <p id="carrito-mensaje"></p><button class="text-button" id="carrito-deshacer" type="button">Deshacer</button><button class="icon-button" id="cerrar-carrito-feedback" type="button" aria-label="Cerrar aviso"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
-    </div>
-
-    <div class="cart-layout">
-      <section class="cart-products" aria-labelledby="productos-carrito-titulo">
-        <div class="cart-section-heading">
-          <h3 id="productos-carrito-titulo">Tus juegos</h3>
-          <button class="text-button cart-clear" id="vaciar-carrito" type="button" hidden>Vaciar carrito</button>
-        </div>
-        <div class="cart-empty" id="carrito-vacio">
-          <span class="cart-empty-icon" aria-hidden="true"><svg class="icon"><use href="#icon-cart"/></svg></span>
-          <h3>Tu carrito está vacío</h3>
-          <p>Explora el catálogo y encuentra tu próxima aventura.</p>
-          <button class="button button-primary" type="button" id="explorar-juegos">Explorar juegos</button>
-        </div>
-        <ul class="cart-list" id="lista-carrito" aria-label="Productos en el carrito"></ul>
-      </section>
-
-      <aside class="cart-summary" id="resumen-carrito" aria-labelledby="resumen-titulo" hidden>
-        <h3 id="resumen-titulo">Resumen del pedido</h3>
-        <dl class="cart-totals">
-          <div><dt>Subtotal</dt><dd id="carrito-subtotal">$0.00</dd></div>
-          <div id="fila-ahorro" hidden><dt>Ahorro</dt><dd class="cart-savings" id="carrito-ahorro">−$0.00</dd></div>
-          <div><dt>Entrega digital</dt><dd class="cart-free">Gratis</dd></div>
-          <div class="cart-total"><dt>Total</dt><dd id="carrito-total">$0.00 <small>USD</small></dd></div>
-        </dl>
-        <button class="button button-primary cart-checkout" id="continuar-pago" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg>Continuar al pago</button>
-        <p class="cart-secure"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Compra protegida y entrega digital</p>
-        <p class="cart-demo-note">Demo académica: no se realizará ningún cobro ni se entregarán claves reales.</p>
-        <p class="cart-checkout-message" id="mensaje-pago" role="status" aria-live="polite" hidden></p>
-      </aside>
-    </div>
-  </dialog>
 </body>
 </html>

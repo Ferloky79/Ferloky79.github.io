@@ -1,5 +1,14 @@
 {
-  "name": "gamevault", "version": "2.0.0", "private": true,
-  "scripts": {"dev": "python -m http.server 5500", "test": "node test-e2e.cjs"},
-  "devDependencies": {"playwright": "1.62.1"}
+  "name": "gamevault",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "python -m http.server 5500",
+    "test": "node test-e2e.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "playwright": "1.62.1"
+  }
 }
