@@ -79,7 +79,7 @@ h1 { margin: 20px 0 14px; font-size: clamp(36px, 4.3vw, 64px); font-weight: 750;
 .button-primary:hover:not(:disabled) { background: #1e57bd; }
 .button-secondary { background: #11151de6; border-color: #697186; }
 .button-secondary:hover:not(:disabled) { background: #22293a; }
-.demo-note { margin: 16px 0 0; color: #c0c7d7; font-size: 12px; }
+.product-note { margin: 16px 0 0; color: #c0c7d7; font-size: 12px; }
 .hero-art { margin: 0; position: relative; }
 .hero-art img { width: 100%; height: auto; aspect-ratio: 460 / 300; object-fit: cover; border-radius: 18px; border: 1px solid #697186; box-shadow: 0 24px 70px #0005; }
 .hero-art figcaption { margin-top: 12px; color: #d0d5e1; font-size: 12px; display: flex; gap: 9px; align-items: center; }

@@ -50,11 +50,16 @@ window.GameVaultAPI = (() => {
     args:['--no-sandbox','--disable-dev-shm-usage']});
   try {
     const page = await browser.newPage(); const errors=[];
+    await page.addInitScript(()=>{ Math.random=()=>0.999; });
     page.on('pageerror',e=>errors.push(e.message));
     await page.route('**/supabase-api.js',route=>route.fulfill({contentType:'text/javascript',body:mock}));
     await page.goto(`http://127.0.0.1:${server.address().port}`);
     await page.waitForFunction(()=>document.querySelectorAll('.game-card').length===13);
     assert.equal(await page.locator('.game-card').count(),13);
+    assert.equal(await page.locator('body').getAttribute('data-view'),'inicio');
+    assert.equal(await page.locator('#hero-titulo').textContent(),'Marvel’s Wolverine');
+    await page.locator('.main-nav a[href="#catalogo"]').click();
+    await page.waitForFunction(()=>document.body.dataset.view==='catalogo');
     await page.locator('[data-platform="switch"]').click();
     assert.equal(await page.locator('.game-card').count(),3);
     await page.locator('#buscar').fill('Mario Kart');
@@ -68,7 +73,7 @@ window.GameVaultAPI = (() => {
     await page.waitForFunction(()=>document.body.dataset.view==='detalle');
     assert.match(await page.locator('#detalle-titulo').textContent(),/EA SPORTS FC 24/);
     await page.goBack();
-    await page.waitForFunction(()=>document.body.dataset.view==='tienda');
+    await page.waitForFunction(()=>document.body.dataset.view==='catalogo');
     await page.locator('[data-add="1"]').first().click();
     await page.locator('#abrir-carrito').click();
     assert.equal(new URL(page.url()).hash,'#carrito');

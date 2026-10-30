@@ -97,7 +97,7 @@ function crearTarjeta(juego) {
   const rating = elemento("span", "rating");
   const estrella = elemento("span", "rating-star", "★ ");
   estrella.setAttribute("aria-hidden", "true");
-  rating.append(elemento("span", "visually-hidden", "Valoración de ejemplo: "), estrella, document.createTextNode(juego.valoracion.toFixed(1)), elemento("span", "visually-hidden", " de 5"));
+  rating.append(elemento("span", "visually-hidden", "Valoración: "), estrella, document.createTextNode(juego.valoracion.toFixed(1)), elemento("span", "visually-hidden", " de 5"));
   meta.append(plataforma, rating);
 
   const titulo = elemento("h3");
@@ -329,7 +329,8 @@ function renderizarCheckout() {
 }
 
 function hashDeVista(vista, destino = null) {
-  if (vista === "tienda") return destino && destino.startsWith("#") ? destino : "#inicio";
+  if (vista === "inicio") return destino && destino.startsWith("#") ? destino : "#inicio";
+  if (vista === "catalogo") return "#catalogo";
   if (vista === "detalle") return `#producto/${destino}`;
   return `#${vista}`;
 }
@@ -337,9 +338,10 @@ function hashDeVista(vista, destino = null) {
 function mostrarVista(vista, destino = null, actualizarUrl = true) {
   const hash = hashDeVista(vista, destino);
   if (actualizarUrl && location.hash !== hash) history.pushState(null, "", hash);
-  const enTienda = vista === "tienda";
-  $("oferta").hidden = !enTienda;
-  $("catalogo").hidden = !enTienda;
+  const enInicio = vista === "inicio";
+  const enCatalogo = vista === "catalogo";
+  $("oferta").hidden = !enInicio;
+  $("catalogo").hidden = !enCatalogo;
   $("detalle").hidden = vista !== "detalle";
   $("carrito").hidden = vista !== "carrito";
   $("checkout").hidden = vista !== "checkout";
@@ -354,7 +356,7 @@ function mostrarVista(vista, destino = null, actualizarUrl = true) {
     if (vista === "confirmacion") $("confirmacion-titulo").focus({ preventScroll: true });
     if (vista === "cuenta") $("cuenta-titulo").focus({ preventScroll: true });
     if (vista === "perfil") $("perfil-titulo").focus({ preventScroll: true });
-    const objetivo = enTienda && destino && document.querySelector(destino);
+    const objetivo = (enInicio || enCatalogo) && destino && document.querySelector(destino);
     (objetivo || $("contenido")).scrollIntoView({ block: "start" });
   });
 }
@@ -464,7 +466,7 @@ function crearJuegoEntregado(juego) {
 function renderizarConfirmacion(pedido) {
   ultimoPedido = pedido;
   $("juegos-entregados").replaceChildren(...pedido.juegos.map(crearJuegoEntregado));
-  $("confirmacion-mensaje").textContent = `Compra demo registrada para ${pedido.email}. Copia tus claves ficticias aquí; no se envían correos ni se realizan cobros.`;
+  $("confirmacion-mensaje").textContent = `Pedido registrado para ${pedido.email}. Tus claves digitales están listas para copiar.`;
   $("numero-pedido").textContent = pedido.numero;
   $("confirmacion-total").textContent = formatoPrecio(pedido.total);
   $("confirmacion-metodo").textContent = pedido.metodo;
@@ -695,12 +697,12 @@ function mostrarDetalles(id) {
   const contenido = document.createDocumentFragment();
   const copia = elemento("div", "product-copy");
   const datos = elemento("dl", "product-facts");
-  [["Plataforma", plataformas[juego.plataforma].nombre], ["Edición", juego.edicion], ["Formato", "Clave digital"], ["Región", juego.region], ["Estado", juego.disponible ? "Disponible en la demo" : "No disponible"]].forEach(([nombre, valor]) => datos.append(elemento("dt", "", nombre), elemento("dd", "", valor)));
+  [["Plataforma", plataformas[juego.plataforma].nombre], ["Edición", juego.edicion], ["Formato", "Clave digital"], ["Región", juego.region], ["Estado", juego.disponible ? "Disponible" : "No disponible"]].forEach(([nombre, valor]) => datos.append(elemento("dt", "", nombre), elemento("dd", "", valor)));
   const agregar = elemento("button", "button button-primary", "Agregar al carrito");
   agregar.type = "button";
   agregar.dataset.add = juego.id;
   agregar.disabled = !juego.disponible;
-  const aviso = elemento("p", "demo-note", "Datos de ejemplo. Verifica la plataforma y la región antes de una compra real.");
+  const aviso = elemento("p", "product-note", "Verifica la plataforma y la región antes de agregar el producto.");
   copia.append(elemento("p", "dialog-description", juego.descripcion), datos, crearPrecio(juego, "dialog-prices"), agregar, aviso);
   contenido.append(crearImagen(juego, "dialog-art"), copia);
   abrirDialogo(juego.titulo, contenido);
@@ -716,7 +718,7 @@ function aplicarRuta() {
     const juego = catalogo.find((item) => item.id === Number(producto[1]));
     if (juego) { mostrarDetalles(juego.id); return; }
     history.replaceState(null, "", "#catalogo");
-    mostrarVista("tienda", "#catalogo", false);
+    mostrarVista("catalogo", "#catalogo", false);
     return;
   }
   if (ruta === "#carrito") { renderizarCarrito(); mostrarVista("carrito", null, false); return; }
@@ -728,16 +730,17 @@ function aplicarRuta() {
   if (ruta === "#cuenta") { seleccionarAuthTab("login"); mostrarVista(usuarioActual ? "perfil" : "cuenta", null, false); return; }
   if (ruta === "#perfil") { mostrarVista(usuarioActual ? "perfil" : "cuenta", null, false); return; }
   if (ruta === "#confirmacion" && ultimoPedido) { mostrarVista("confirmacion", null, false); return; }
-  const anclasTienda = new Set(["#inicio", "#catalogo", "#oferta", "#ayuda", "#canjear", "#reembolso", "#soporte"]);
-  const destino = anclasTienda.has(ruta) ? ruta : "#inicio";
+  if (ruta === "#catalogo") { mostrarVista("catalogo", "#catalogo", false); return; }
+  const anclasInicio = new Set(["#inicio", "#oferta", "#ayuda", "#canjear", "#reembolso", "#soporte"]);
+  const destino = anclasInicio.has(ruta) ? ruta : "#inicio";
   if (destino !== ruta) history.replaceState(null, "", destino);
-  mostrarVista("tienda", destino, false);
+  mostrarVista("inicio", destino, false);
 }
 function conectarEventos() {
   let temporizadorBusqueda;
   const buscar = () => { estado.busqueda = $("buscar").value.trim(); renderizarCatalogo(); };
   $("buscar").addEventListener("input", () => { clearTimeout(temporizadorBusqueda); temporizadorBusqueda = setTimeout(buscar, 220); });
-  $("busqueda-form").addEventListener("submit", (evento) => { evento.preventDefault(); clearTimeout(temporizadorBusqueda); buscar(); mostrarVista("tienda", "#catalogo"); });
+  $("busqueda-form").addEventListener("submit", (evento) => { evento.preventDefault(); clearTimeout(temporizadorBusqueda); buscar(); mostrarVista("catalogo", "#catalogo"); });
   document.querySelectorAll("[data-platform]").forEach((boton) => boton.addEventListener("click", () => filtrarPlataforma(boton.dataset.platform)));
   document.querySelectorAll("[data-filter-link]").forEach((enlace) => enlace.addEventListener("click", () => filtrarPlataforma(enlace.dataset.filterLink)));
   $("ordenar").addEventListener("change", () => { estado.orden = $("ordenar").value; renderizarCatalogo(); });
@@ -786,12 +789,13 @@ function conectarEventos() {
   $("continuar-pago").addEventListener("click", abrirCheckout);
   document.querySelectorAll("[data-show-store]").forEach((control) => control.addEventListener("click", (evento) => {
     evento.preventDefault();
-    mostrarVista("tienda", control.getAttribute("href") || "#inicio");
+    const destino = control.getAttribute("href") || "#inicio";
+    mostrarVista(destino === "#catalogo" ? "catalogo" : "inicio", destino);
   }));
   document.querySelectorAll(".brand, .main-nav a, .footer-platforms a").forEach((enlace) => enlace.addEventListener("click", (evento) => {
-    if (document.body.dataset.view === "tienda") return;
     evento.preventDefault();
-    mostrarVista("tienda", enlace.getAttribute("href") || "#inicio");
+    const destino = enlace.getAttribute("href") || "#inicio";
+    mostrarVista(destino === "#catalogo" ? "catalogo" : "inicio", destino);
   }));
   document.querySelectorAll("[data-open-cart]").forEach((control) => control.addEventListener("click", () => {
     abrirCarritoDialogo();
@@ -854,7 +858,7 @@ function conectarEventos() {
     void registrarCuenta();
   });
   $("cerrar-sesion").addEventListener("click", cerrarSesion);
-  document.querySelectorAll("[data-profile-store]").forEach((control) => control.addEventListener("click", () => mostrarVista("tienda", "#catalogo")));
+  document.querySelectorAll("[data-profile-store]").forEach((control) => control.addEventListener("click", () => mostrarVista("catalogo", "#catalogo")));
   addEventListener("hashchange", aplicarRuta);
   addEventListener("popstate", aplicarRuta);
   // <dialog> gestiona Escape y el fondo inerte. Refuerza el ciclo de Tab
@@ -871,7 +875,7 @@ async function iniciar() {
   conectarEventos();
   document.body.dataset.view = "cargando";
   actualizarMetodoPago();
-  // Retira las credenciales y sesiones de la demo anterior.
+  // Retira las credenciales y sesiones de la versión anterior.
   localStorage.removeItem('gamevault:sesion'); sessionStorage.removeItem('gamevault:cuenta-temporal');
   if (!localStorage.getItem(CLAVE_CARRITO) && localStorage.getItem('gamevault:carrito')) {
     localStorage.setItem(CLAVE_CARRITO, localStorage.getItem('gamevault:carrito'));
@@ -900,7 +904,7 @@ async function iniciar() {
     catch (error) { avisar("No pudimos recuperar tu cuenta: " + mensajeError(error)); }
     renderizarCatalogo();
     document.querySelectorAll("[data-platform], #ordenar, #abrir-carrito, #abrir-cuenta").forEach((control) => { control.disabled = false; });
-    const destacado = catalogo.find((juego) => juego.id === 5) || catalogo[0];
+    const destacado = catalogo[Math.floor(Math.random() * catalogo.length)];
     if (destacado) {
       $("hero-titulo").textContent = destacado.titulo;
       document.querySelector('.hero-art img').src = destacado.imagen;
