@@ -42,7 +42,8 @@
         <a href="#inicio" class="nav-link">Inicio</a>
         <a href="#catalogo" class="nav-link">Navegar</a>
         <a href="#oferta" class="nav-link">Ofertas</a>
-        <a href="#ayuda" class="nav-link">Soporte</a>
+        <a href="#soporte" class="nav-link">Soporte</a>
+        <a href="#admin" class="nav-link" id="nav-admin" hidden>Administrar</a>
       </nav>
       <form class="search-form" role="search" id="busqueda-form">
         <label class="visually-hidden" for="buscar">Buscar videojuegos por título</label>
@@ -135,6 +136,11 @@
         <a class="button button-secondary" href="#catalogo">Volver al catálogo</a>
       </div>
       <div class="product-view-content" id="detalle-contenido"></div>
+      <section class="reviews-panel" id="resenas" aria-labelledby="resenas-titulo">
+        <div class="section-heading compact-heading"><div><p class="section-eyebrow">COMUNIDAD</p><h2 id="resenas-titulo">Reseñas de jugadores</h2></div><p class="review-summary" id="resenas-resumen">Cargando reseñas…</p></div>
+        <div id="resena-formulario"></div>
+        <div id="lista-resenas" class="reviews-list" aria-live="polite"></div>
+      </section>
     </section>
 
     <section class="cart-view container" id="carrito" aria-labelledby="carrito-titulo" hidden>
@@ -282,10 +288,45 @@
       <div class="profile-layout">
         <section class="profile-card" aria-labelledby="datos-perfil-titulo"><div class="profile-avatar" id="perfil-iniciales" aria-hidden="true">AG</div><div><span class="profile-state"><span aria-hidden="true"></span> Sesión activa</span><h2 id="datos-perfil-titulo"><span id="perfil-nombre">Jugador</span></h2><p id="perfil-email"></p><span class="profile-type" id="perfil-tipo">Cliente</span></div></section>
         <section class="profile-details" aria-labelledby="resumen-perfil-titulo"><h2 id="resumen-perfil-titulo">Resumen de la cuenta</h2><dl><div><dt>Miembro desde</dt><dd id="perfil-creado">Octubre de 2026</dd></div><div><dt>Compras realizadas</dt><dd id="perfil-pedidos">0</dd></div><div><dt>Juegos en el carrito</dt><dd id="perfil-carrito">0</dd></div></dl></section>
-        <section class="profile-actions" aria-labelledby="accesos-perfil-titulo"><h2 id="accesos-perfil-titulo">Accesos rápidos</h2><button class="button button-primary" type="button" data-profile-store>Explorar catálogo</button><button class="button button-secondary" type="button" data-open-cart>Ver carrito</button></section>
+        <section class="profile-actions" aria-labelledby="accesos-perfil-titulo"><h2 id="accesos-perfil-titulo">Accesos rápidos</h2><button class="button button-primary" type="button" data-profile-store>Explorar catálogo</button><button class="button button-secondary" type="button" data-open-cart>Ver carrito</button><a class="button button-secondary" href="#soporte">Mis tickets</a><a class="button button-secondary" id="perfil-admin" href="#admin" hidden>Administrar catálogo</a></section>
       </div>
       <section class="checkout-panel" aria-labelledby="historial-titulo"><h2 id="historial-titulo">Mis compras</h2><div id="historial-pedidos"></div></section>
       <p class="profile-notice"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Perfil sincronizado con tu cuenta.</p>
+    </section>
+
+    <section class="support-view container" id="soporte-vista" aria-labelledby="soporte-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#inicio">Tienda</a><span aria-hidden="true">›</span><span aria-current="page">Soporte</span></nav>
+      <div class="view-heading"><div><p class="eyebrow">CENTRO DE AYUDA</p><h1 id="soporte-titulo" tabindex="-1">Soporte</h1><p>Abre una consulta y sigue la conversación con el equipo.</p></div></div>
+      <div id="soporte-sesion" class="empty-state" hidden><h2>Inicia sesión para solicitar ayuda</h2><p>Los tickets son privados y quedan vinculados a tu cuenta.</p><a class="button button-primary" href="#cuenta">Iniciar sesión</a></div>
+      <div id="soporte-contenido" class="support-layout">
+        <form id="formulario-ticket" class="panel-form" novalidate>
+          <h2>Nuevo ticket</h2>
+          <label for="ticket-asunto">Asunto</label><input id="ticket-asunto" minlength="5" maxlength="150" required>
+          <label for="ticket-categoria">Categoría</label><select id="ticket-categoria"><option value="CUENTA">Cuenta</option><option value="COMPRA">Compra</option><option value="CLAVE">Clave</option><option value="REEMBOLSO">Reembolso (consulta)</option><option value="OTRO">Otro</option></select>
+          <label for="ticket-pedido">Pedido relacionado (opcional)</label><select id="ticket-pedido"><option value="">Sin pedido relacionado</option></select>
+          <label for="ticket-descripcion">Descripción</label><textarea id="ticket-descripcion" minlength="10" maxlength="5000" rows="6" required></textarea>
+          <p class="field-help">No compartas contraseñas ni datos reales de pago. Un ticket de reembolso no ejecuta devoluciones.</p>
+          <button class="button button-primary" type="submit">Abrir ticket</button><p id="ticket-form-estado" class="auth-status" role="alert" hidden></p>
+        </form>
+        <section class="support-list-panel" aria-labelledby="tickets-titulo"><div class="support-list-heading"><h2 id="tickets-titulo">Tickets</h2><button class="button button-secondary" id="actualizar-tickets" type="button">Actualizar</button></div><div id="lista-tickets" class="ticket-list"></div></section>
+      </div>
+    </section>
+
+    <section class="ticket-view container" id="ticket-vista" aria-labelledby="ticket-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#soporte">Soporte</a><span aria-hidden="true">›</span><span aria-current="page">Conversación</span></nav>
+      <div id="ticket-detalle"></div>
+    </section>
+
+    <section class="admin-view container" id="admin" aria-labelledby="admin-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#inicio">Tienda</a><span aria-hidden="true">›</span><span aria-current="page">Administración</span></nav>
+      <div class="view-heading"><div><p class="eyebrow">ACCESO ADMIN</p><h1 id="admin-titulo" tabindex="-1">Gestión del catálogo</h1><p>Administra juegos, presentaciones, publicación y stock ficticio desde una sola interfaz.</p></div><button class="button button-secondary" id="recargar-admin" type="button">Recargar datos</button></div>
+      <div id="admin-denegado" class="empty-state" hidden><h2>Acceso restringido</h2><p>Esta vista requiere una cuenta con rol ADMIN asignado en la base.</p></div>
+      <div id="admin-contenido" class="admin-layout" hidden>
+        <section class="admin-panel"><h2>Videojuegos</h2><form id="formulario-videojuego" class="panel-form" novalidate><input id="admin-juego-id" type="hidden"><label for="admin-juego-titulo">Título</label><input id="admin-juego-titulo" maxlength="150" required><label for="admin-juego-descripcion">Descripción</label><textarea id="admin-juego-descripcion" rows="5" required></textarea><label for="admin-juego-valoracion">Valoración editorial</label><input id="admin-juego-valoracion" type="number" min="0" max="5" step="0.1" required><div class="form-actions"><button class="button button-primary" type="submit">Guardar juego</button><button class="button button-secondary" id="nuevo-juego" type="button">Limpiar</button></div></form><div id="admin-juegos" class="admin-records"></div></section>
+        <section class="admin-panel"><h2>Productos</h2><form id="formulario-producto" class="panel-form" novalidate><input id="admin-producto-id" type="hidden"><label for="admin-producto-juego">Videojuego</label><select id="admin-producto-juego" required></select><label for="admin-producto-categoria">Plataforma</label><select id="admin-producto-categoria" required></select><label for="admin-producto-edicion">Edición</label><input id="admin-producto-edicion" maxlength="80" required><label for="admin-producto-region">Región</label><input id="admin-producto-region" maxlength="40" required><div class="form-row"><div><label for="admin-producto-precio">Precio USD</label><input id="admin-producto-precio" type="number" min="0" step="0.01" required></div><div><label for="admin-producto-anterior">Precio anterior USD</label><input id="admin-producto-anterior" type="number" min="0" step="0.01"></div></div><label for="admin-producto-imagen">URL de portada</label><input id="admin-producto-imagen" type="text" pattern="(assets/.*|https://.*)" required><label class="check-row"><input id="admin-producto-publicado" type="checkbox"> Publicado</label><div class="form-actions"><button class="button button-primary" type="submit">Guardar producto</button><button class="button button-secondary" id="nuevo-producto" type="button">Limpiar</button></div></form><div id="admin-productos" class="admin-records"></div></section>
+        <section class="admin-panel"><h2>Plataformas y stock</h2><div id="admin-categorias" class="admin-records"></div><form id="formulario-claves" class="panel-form" novalidate><h3>Añadir claves ficticias</h3><label for="admin-claves-producto">Producto</label><select id="admin-claves-producto" required></select><label for="admin-claves-codigos">Códigos (uno por línea)</label><textarea id="admin-claves-codigos" rows="5" placeholder="DEMO-EJEMPLO-001" required></textarea><button class="button button-primary" type="submit">Añadir stock</button></form><h3>Claves disponibles</h3><div id="admin-claves" class="admin-records"></div></section>
+      </div>
+      <p id="admin-estado" class="auth-status" role="alert" hidden></p>
     </section>
 
     <section class="confirmation-view container" id="confirmacion" aria-labelledby="confirmacion-titulo" hidden>
@@ -302,7 +343,7 @@
           <div><dt>Estado</dt><dd class="verified"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Confirmado</dd></div>
         </dl>
         <button class="button button-primary confirmation-home" type="button" data-show-store>Volver al inicio</button>
-        <p class="confirmation-help">¿Necesitas ayuda? <a href="#soporte" data-show-store>Contactar soporte</a></p>
+        <p class="confirmation-help">¿Necesitas ayuda? <a href="#soporte">Contactar soporte</a></p>
       </article>
     </section>
   </main>
