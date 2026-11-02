@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="GameVault: catálogo de videojuegos para PlayStation, Xbox y Nintendo Switch. Proyecto académico con datos de ejemplo.">
+  <meta name="description" content="GameVault: catálogo de videojuegos para PlayStation, Xbox y Nintendo Switch.">
   <meta name="theme-color" content="#10121c">
   <title>GameVault · Tu próximo juego empieza aquí</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261101-2">
+  <style>body:not([data-view="inicio"]) #inicio { display: none !important; }</style>
   <script src="vendor/supabase-2.99.1.js" defer></script>
   <script src="supabase-config.js" defer></script>
   <script src="supabase-api.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=20261102-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
@@ -32,7 +33,7 @@
     <symbol id="icon-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
   </svg>
 
-  <header class="site-header" id="inicio">
+  <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="#inicio" aria-label="GameVault, inicio">
         <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#icon-game"/></svg></span>
@@ -42,7 +43,8 @@
         <a href="#inicio" class="nav-link">Inicio</a>
         <a href="#catalogo" class="nav-link">Navegar</a>
         <a href="#oferta" class="nav-link">Ofertas</a>
-        <a href="#ayuda" class="nav-link">Soporte</a>
+        <a href="#soporte" class="nav-link">Soporte</a>
+        <a href="#admin" class="nav-link" id="nav-admin" hidden>Administrar</a>
       </nav>
       <form class="search-form" role="search" id="busqueda-form">
         <label class="visually-hidden" for="buscar">Buscar videojuegos por título</label>
@@ -51,7 +53,7 @@
         <button type="submit" class="visually-hidden-focusable">Buscar</button>
       </form>
       <div class="header-actions">
-        <button class="icon-button cart-button" id="abrir-carrito" type="button" aria-label="Abrir carrito, 0 juegos" aria-haspopup="dialog" aria-controls="carrito-dialogo" disabled>
+        <button class="icon-button cart-button" id="abrir-carrito" type="button" aria-label="Abrir carrito, 0 juegos" aria-controls="carrito" disabled>
           <svg class="icon" aria-hidden="true"><use href="#icon-cart"/></svg>
           <span class="cart-count" id="contador-carrito" aria-hidden="true">0</span>
         </button>
@@ -63,21 +65,47 @@
   </header>
 
   <main id="contenido" tabindex="-1">
+    <section class="home-intro" id="inicio" aria-labelledby="inicio-titulo">
+      <div class="container home-intro-inner">
+        <div class="home-copy">
+          <p class="eyebrow home-eyebrow">TU BIBLIOTECA DIGITAL EMPIEZA AQUÍ</p>
+          <h1 id="inicio-titulo">Encuentra tu próxima gran historia</h1>
+          <p class="home-description">Explora videojuegos para PlayStation, Xbox y Nintendo Switch en una tienda clara, rápida y pensada para descubrir.</p>
+          <div class="home-actions">
+            <a class="button button-primary" href="#catalogo">Explorar catálogo</a>
+            <a class="button button-secondary" href="#oferta">Ver oferta destacada</a>
+          </div>
+          <ul class="home-benefits" aria-label="Ventajas de GameVault">
+            <li><strong>3</strong><span>plataformas</span></li>
+            <li><strong>100%</strong><span>entrega digital</span></li>
+            <li><strong>24 h</strong><span>ayuda disponible</span></li>
+          </ul>
+        </div>
+        <div class="home-visual" aria-hidden="true">
+          <div class="vault-orbit vault-orbit-outer"></div>
+          <div class="vault-orbit vault-orbit-inner"></div>
+          <div class="vault-core"><svg class="icon"><use href="#icon-game"/></svg><span>GAME<br>VAULT</span></div>
+          <span class="visual-chip chip-ps">PS5</span>
+          <span class="visual-chip chip-xbox">XBOX</span>
+          <span class="visual-chip chip-switch">SWITCH</span>
+        </div>
+      </div>
+    </section>
+
     <section class="hero" id="oferta" aria-labelledby="hero-titulo">
       <div class="container hero-inner">
         <div class="hero-copy">
           <span class="eyebrow offer-badge">OFERTA DESTACADA</span>
-          <h1 id="hero-titulo">Forza Motorsport</h1>
+          <h2 id="hero-titulo">Forza Motorsport</h2>
           <p class="hero-description" id="hero-descripcion">Vive la emoción de la pista. Encuentra tu próximo desafío en nuestro catálogo de videojuegos.</p>
           <div class="hero-price" id="hero-precio"></div>
           <div class="hero-actions">
             <button class="button button-primary" id="hero-agregar" type="button" disabled>Agregar al carrito</button>
-            <button class="button button-secondary" id="hero-detalles" type="button" aria-haspopup="dialog" disabled>Ver detalles</button>
+            <button class="button button-secondary" id="hero-detalles" type="button" disabled>Ver detalles</button>
           </div>
-          <p class="demo-note">Proyecto académico · precios y disponibilidad de ejemplo</p>
         </div>
         <figure class="hero-art">
-          <img src="assets/forza.jpg" alt="Portada de Forza Motorsport" width="460" height="215" fetchpriority="high">
+          <img src="assets/forza.jpg" alt="Portada del videojuego Forza Motorsport" width="460" height="215" fetchpriority="high">
           <figcaption><span class="availability-dot" aria-hidden="true"></span> Xbox Series X|S <span aria-hidden="true">·</span> Clave digital</figcaption>
         </figure>
       </div>
@@ -125,6 +153,50 @@
       <p class="catalog-hint">Abre una tarjeta para ver sus detalles. Precios en USD.</p>
     </section>
 
+    <section class="product-view container" id="detalle" aria-labelledby="detalle-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación">
+        <a href="#inicio">Tienda</a><span aria-hidden="true">›</span>
+        <a href="#catalogo">Catálogo</a><span aria-hidden="true">›</span>
+        <span aria-current="page">Detalle del videojuego</span>
+      </nav>
+      <div class="product-view-heading">
+        <div><p class="eyebrow">DETALLE DEL VIDEOJUEGO</p><h1 id="detalle-titulo" tabindex="-1">Detalle del videojuego</h1></div>
+        <a class="button button-secondary" href="#catalogo">Volver al catálogo</a>
+      </div>
+      <div class="product-view-content" id="detalle-contenido"></div>
+      <section class="reviews-panel" id="resenas" aria-labelledby="resenas-titulo">
+        <div class="section-heading compact-heading"><div><p class="section-eyebrow">COMUNIDAD</p><h2 id="resenas-titulo">Reseñas de jugadores</h2></div><p class="review-summary" id="resenas-resumen">Cargando reseñas…</p></div>
+        <div id="resena-formulario"></div>
+        <div id="lista-resenas" class="reviews-list" aria-live="polite"></div>
+      </section>
+    </section>
+
+    <section class="cart-view container" id="carrito" aria-labelledby="carrito-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación">
+        <a href="#inicio">Tienda</a><span aria-hidden="true">›</span><span aria-current="page">Carrito de compras</span>
+      </nav>
+      <div class="cart-dialog-header">
+        <div><p class="eyebrow cart-eyebrow">TU COMPRA</p><h1 id="carrito-titulo" tabindex="-1">Carrito de compras</h1><p class="cart-item-count" id="carrito-cantidad">0 productos</p></div>
+        <a class="button button-secondary" href="#catalogo">Seguir comprando</a>
+      </div>
+      <div class="cart-action-feedback" id="carrito-feedback" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <p id="carrito-mensaje"></p><button class="text-button" id="carrito-deshacer" type="button">Deshacer</button><button class="icon-button" id="cerrar-carrito-feedback" type="button" aria-label="Cerrar aviso"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+      </div>
+      <div class="cart-layout">
+        <section class="cart-products" aria-labelledby="productos-carrito-titulo">
+          <div class="cart-section-heading"><h2 id="productos-carrito-titulo">Tus juegos</h2><button class="text-button cart-clear" id="vaciar-carrito" type="button" hidden>Vaciar carrito</button></div>
+          <div class="cart-empty" id="carrito-vacio"><span class="cart-empty-icon" aria-hidden="true"><svg class="icon"><use href="#icon-cart"/></svg></span><h2>Tu carrito está vacío</h2><p>Explora el catálogo y encuentra tu próxima aventura.</p><a class="button button-primary" href="#catalogo" id="explorar-juegos">Explorar juegos</a></div>
+          <ul class="cart-list" id="lista-carrito" aria-label="Productos en el carrito"></ul>
+        </section>
+        <aside class="cart-summary" id="resumen-carrito" aria-labelledby="resumen-titulo" hidden>
+          <h2 id="resumen-titulo">Resumen del pedido</h2>
+          <dl class="cart-totals"><div><dt>Subtotal</dt><dd id="carrito-subtotal">$0.00</dd></div><div id="fila-ahorro" hidden><dt>Ahorro</dt><dd class="cart-savings" id="carrito-ahorro">−$0.00</dd></div><div><dt>Entrega digital</dt><dd class="cart-free">Gratis</dd></div><div class="cart-total"><dt>Total</dt><dd id="carrito-total">$0.00 <small>USD</small></dd></div></dl>
+          <button class="button button-primary cart-checkout" id="continuar-pago" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg>Continuar al pago</button>
+          <p class="cart-secure"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Compra protegida y entrega digital</p><p class="cart-checkout-message" id="mensaje-pago" role="status" aria-live="polite" hidden></p>
+        </aside>
+      </div>
+    </section>
+
     <section class="checkout-view container" id="checkout" aria-labelledby="checkout-titulo" hidden>
       <nav class="breadcrumbs" aria-label="Ruta de navegación">
         <button type="button" data-show-store>Tienda</button><span aria-hidden="true">›</span>
@@ -133,7 +205,7 @@
       </nav>
       <div class="checkout-heading">
         <div><h1 id="checkout-titulo" tabindex="-1">Finalizar compra</h1><p>Revisa tus datos y completa el pago de forma segura.</p></div>
-        <span class="checkout-status"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg> Pago simulado</span>
+        <span class="checkout-status"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg> Entrega digital</span>
       </div>
       <div class="checkout-progress" aria-label="Progreso de compra">
         <span class="is-complete"><b>1.</b> Carrito <small>Completado</small></span>
@@ -147,12 +219,12 @@
             <div class="checkout-panel-title"><span class="step-number step-green">1</span><div><h2 id="entrega-titulo">Entrega digital</h2><p>Correo de contacto del pedido</p></div></div>
             <label for="correo-entrega">Correo electrónico <span aria-hidden="true">*</span></label>
             <div class="input-with-icon"><svg class="icon" aria-hidden="true"><use href="#icon-mail"/></svg><input id="correo-entrega" name="email" type="email" autocomplete="email" placeholder="nombre@correo.com" required aria-describedby="ayuda-correo error-correo"></div>
-            <p class="field-help" id="ayuda-correo">El correo se guardará con el pedido. Las claves ficticias se muestran al confirmar; esta demo no envía correos.</p>
+            <p class="field-help" id="ayuda-correo">Este correo quedará asociado al pedido.</p>
             <p class="field-error" id="error-correo" aria-live="polite"></p>
           </section>
 
           <section class="checkout-panel" aria-labelledby="pago-titulo">
-            <div class="checkout-panel-title"><span class="step-number">2</span><div><h2 id="pago-titulo">Método de pago</h2><p>Simulación académica: no se realizan cobros.</p></div></div>
+            <div class="checkout-panel-title"><span class="step-number">2</span><div><h2 id="pago-titulo">Método de pago</h2><p>Selecciona tu opción preferida.</p></div></div>
             <div class="payment-options" role="radiogroup" aria-label="Selecciona un método de pago">
               <label class="payment-option is-selected"><input type="radio" name="metodo" value="tarjeta" checked><span class="radio-mark"></span><svg class="icon" aria-hidden="true"><use href="#icon-card"/></svg><span><b>Tarjeta de crédito</b><small>Visa, Mastercard y Amex</small></span><em>Seleccionado</em></label>
               <label class="payment-option"><input type="radio" name="metodo" value="paypal"><span class="radio-mark"></span><span class="paypal-mark" aria-hidden="true">PayPal</span><span><b>PayPal</b><small>Paga con tu cuenta</small></span></label>
@@ -165,9 +237,9 @@
                 <div><label for="fecha-tarjeta">Fecha <span aria-hidden="true">*</span></label><input id="fecha-tarjeta" name="fecha" inputmode="numeric" autocomplete="cc-exp" placeholder="MM / AA" maxlength="7" required aria-describedby="error-fecha"><p class="field-error" id="error-fecha" aria-live="polite"></p></div>
                 <div><label for="cvv-tarjeta">CVV <span aria-hidden="true">*</span></label><input id="cvv-tarjeta" name="cvv" inputmode="numeric" autocomplete="cc-csc" placeholder="•••" maxlength="4" required aria-describedby="error-cvv"><p class="field-error" id="error-cvv" aria-live="polite"></p></div>
               </div>
-              <p class="payment-privacy"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Pago simulado. No uses datos reales: esta demo no guarda información de tarjetas.</p>
+              <p class="payment-privacy"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> La información de la tarjeta no se almacena.</p>
             </div>
-            <div class="paypal-info" id="info-paypal" hidden><span class="paypal-mark" aria-hidden="true">PayPal</span><p>En esta demo simularemos la autorización sin abrir una cuenta externa ni realizar cobros.</p></div>
+            <div class="paypal-info" id="info-paypal" hidden><span class="paypal-mark" aria-hidden="true">PayPal</span><p>Confirma tu pedido con la opción PayPal.</p></div>
           </section>
         </form>
 
@@ -181,7 +253,7 @@
             <div class="total"><dt>Total</dt><dd id="checkout-total">$0.00</dd></div>
           </dl>
           <button class="button button-primary checkout-pay" type="submit" form="formulario-pago" id="pagar"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg><span>Pagar <strong id="pagar-total">$0.00</strong></span></button>
-          <p class="checkout-legal"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Compra de demostración. No se procesará ningún pago real.</p>
+          <p class="checkout-legal"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Revisa los datos del pedido antes de continuar.</p>
           <p class="checkout-form-error" id="error-formulario" role="alert" hidden></p>
         </aside>
       </div>
@@ -194,8 +266,8 @@
           <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#icon-game"/></svg></span>
           <p class="eyebrow">GAMEVAULT</p>
           <h1 id="cuenta-titulo" tabindex="-1">Tu colección comienza aquí</h1>
-          <p>Inicia sesión para completar tus datos más rápido y consultar tu actividad de demostración.</p>
-          <ul><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Conserva tu carrito</li><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Revisa tus compras demo</li><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Acceso rápido al checkout</li></ul>
+          <p>Inicia sesión para completar tus datos más rápido y consultar tu actividad reciente.</p>
+          <ul><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Conserva tu carrito</li><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Revisa tus compras</li><li><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Acceso rápido al checkout</li></ul>
 
         </aside>
 
@@ -227,7 +299,7 @@
               <p class="field-help" id="ayuda-registro-clave">Mínimo 8 caracteres, con al menos una letra y un número. No uses una contraseña real.</p><p class="field-error" id="error-registro-clave" aria-live="polite"></p>
               <label for="registro-confirmar">Confirmar contraseña</label><div class="password-field"><input id="registro-confirmar" name="password-confirmation" type="password" autocomplete="new-password" required aria-describedby="error-registro-confirmar"><button type="button" data-toggle-password="registro-confirmar" aria-pressed="false">Mostrar</button></div>
               <p class="field-error" id="error-registro-confirmar" aria-live="polite"></p>
-              <label class="auth-consent"><input id="registro-condiciones" type="checkbox" required> Entiendo que este es un proyecto académico y no usaré datos sensibles.</label>
+              <label class="auth-consent"><input id="registro-condiciones" type="checkbox" required> Acepto las condiciones de uso y la política de privacidad.</label>
               <p class="field-error" id="error-registro-condiciones" aria-live="polite"></p>
               <button class="button button-primary auth-submit" type="submit">Crear cuenta</button>
               <p class="auth-status" id="estado-registro" role="alert" hidden></p>
@@ -243,28 +315,63 @@
       <div class="profile-heading"><div><p class="eyebrow">MI CUENTA</p><h1 id="perfil-titulo" tabindex="-1">Perfil</h1><p>Consulta tu información y accesos rápidos.</p></div><button class="button button-secondary" id="cerrar-sesion" type="button">Cerrar sesión</button></div>
       <div class="profile-layout">
         <section class="profile-card" aria-labelledby="datos-perfil-titulo"><div class="profile-avatar" id="perfil-iniciales" aria-hidden="true">AG</div><div><span class="profile-state"><span aria-hidden="true"></span> Sesión activa</span><h2 id="datos-perfil-titulo"><span id="perfil-nombre">Jugador</span></h2><p id="perfil-email"></p><span class="profile-type" id="perfil-tipo">Cliente</span></div></section>
-        <section class="profile-details" aria-labelledby="resumen-perfil-titulo"><h2 id="resumen-perfil-titulo">Resumen de la cuenta</h2><dl><div><dt>Miembro desde</dt><dd id="perfil-creado">Octubre de 2026</dd></div><div><dt>Compras de demostración</dt><dd id="perfil-pedidos">0</dd></div><div><dt>Juegos en el carrito</dt><dd id="perfil-carrito">0</dd></div></dl></section>
-        <section class="profile-actions" aria-labelledby="accesos-perfil-titulo"><h2 id="accesos-perfil-titulo">Accesos rápidos</h2><button class="button button-primary" type="button" data-profile-store>Explorar catálogo</button><button class="button button-secondary" type="button" data-open-cart>Ver carrito</button></section>
+        <section class="profile-details" aria-labelledby="resumen-perfil-titulo"><h2 id="resumen-perfil-titulo">Resumen de la cuenta</h2><dl><div><dt>Miembro desde</dt><dd id="perfil-creado">Octubre de 2026</dd></div><div><dt>Compras realizadas</dt><dd id="perfil-pedidos">0</dd></div><div><dt>Juegos en el carrito</dt><dd id="perfil-carrito">0</dd></div></dl></section>
+        <section class="profile-actions" aria-labelledby="accesos-perfil-titulo"><h2 id="accesos-perfil-titulo">Accesos rápidos</h2><button class="button button-primary" type="button" data-profile-store>Explorar catálogo</button><button class="button button-secondary" type="button" data-open-cart>Ver carrito</button><a class="button button-secondary" href="#soporte">Mis tickets</a><a class="button button-secondary" id="perfil-admin" href="#admin" hidden>Administrar catálogo</a></section>
       </div>
       <section class="checkout-panel" aria-labelledby="historial-titulo"><h2 id="historial-titulo">Mis compras</h2><div id="historial-pedidos"></div></section>
-      <p class="profile-notice"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Perfil sincronizado con tu cuenta. Las compras son simuladas y las claves son ficticias.</p>
+      <p class="profile-notice"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Perfil sincronizado con tu cuenta.</p>
+    </section>
+
+    <section class="support-view container" id="soporte-vista" aria-labelledby="soporte-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#inicio">Tienda</a><span aria-hidden="true">›</span><span aria-current="page">Soporte</span></nav>
+      <div class="view-heading"><div><p class="eyebrow">CENTRO DE AYUDA</p><h1 id="soporte-titulo" tabindex="-1">Soporte</h1><p>Abre una consulta y sigue la conversación con el equipo.</p></div></div>
+      <div id="soporte-sesion" class="empty-state" hidden><h2>Inicia sesión para solicitar ayuda</h2><p>Los tickets son privados y quedan vinculados a tu cuenta.</p><a class="button button-primary" href="#cuenta">Iniciar sesión</a></div>
+      <div id="soporte-contenido" class="support-layout">
+        <form id="formulario-ticket" class="panel-form" novalidate>
+          <h2>Nuevo ticket</h2>
+          <label for="ticket-asunto">Asunto</label><input id="ticket-asunto" minlength="5" maxlength="150" required>
+          <label for="ticket-categoria">Categoría</label><select id="ticket-categoria"><option value="CUENTA">Cuenta</option><option value="COMPRA">Compra</option><option value="CLAVE">Clave</option><option value="REEMBOLSO">Reembolso (consulta)</option><option value="OTRO">Otro</option></select>
+          <label for="ticket-pedido">Pedido relacionado (opcional)</label><select id="ticket-pedido"><option value="">Sin pedido relacionado</option></select>
+          <label for="ticket-descripcion">Descripción</label><textarea id="ticket-descripcion" minlength="10" maxlength="5000" rows="6" required></textarea>
+          <p class="field-help">No compartas contraseñas ni datos reales de pago. Un ticket de reembolso no ejecuta devoluciones.</p>
+          <button class="button button-primary" type="submit">Abrir ticket</button><p id="ticket-form-estado" class="auth-status" role="alert" hidden></p>
+        </form>
+        <section class="support-list-panel" aria-labelledby="tickets-titulo"><div class="support-list-heading"><h2 id="tickets-titulo">Tickets</h2><button class="button button-secondary" id="actualizar-tickets" type="button">Actualizar</button></div><div id="lista-tickets" class="ticket-list"></div></section>
+      </div>
+    </section>
+
+    <section class="ticket-view container" id="ticket-vista" aria-labelledby="ticket-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#soporte">Soporte</a><span aria-hidden="true">›</span><span aria-current="page">Conversación</span></nav>
+      <div id="ticket-detalle"></div>
+    </section>
+
+    <section class="admin-view container" id="admin" aria-labelledby="admin-titulo" hidden>
+      <nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#inicio">Tienda</a><span aria-hidden="true">›</span><span aria-current="page">Administración</span></nav>
+      <div class="view-heading"><div><p class="eyebrow">ACCESO ADMIN</p><h1 id="admin-titulo" tabindex="-1">Gestión del catálogo</h1><p>Administra juegos, presentaciones, publicación y stock ficticio desde una sola interfaz.</p></div><button class="button button-secondary" id="recargar-admin" type="button">Recargar datos</button></div>
+      <div id="admin-denegado" class="empty-state" hidden><h2>Acceso restringido</h2><p>Esta vista requiere una cuenta con rol ADMIN asignado en la base.</p></div>
+      <div id="admin-contenido" class="admin-layout" hidden>
+        <section class="admin-panel"><h2>Videojuegos</h2><form id="formulario-videojuego" class="panel-form" novalidate><input id="admin-juego-id" type="hidden"><label for="admin-juego-titulo">Título</label><input id="admin-juego-titulo" maxlength="150" required><label for="admin-juego-descripcion">Descripción</label><textarea id="admin-juego-descripcion" rows="5" required></textarea><label for="admin-juego-valoracion">Valoración editorial</label><input id="admin-juego-valoracion" type="number" min="0" max="5" step="0.1" required><div class="form-actions"><button class="button button-primary" type="submit">Guardar juego</button><button class="button button-secondary" id="nuevo-juego" type="button">Limpiar</button></div></form><div id="admin-juegos" class="admin-records"></div></section>
+        <section class="admin-panel"><h2>Productos</h2><form id="formulario-producto" class="panel-form" novalidate><input id="admin-producto-id" type="hidden"><label for="admin-producto-juego">Videojuego</label><select id="admin-producto-juego" required></select><label for="admin-producto-categoria">Plataforma</label><select id="admin-producto-categoria" required></select><label for="admin-producto-edicion">Edición</label><input id="admin-producto-edicion" maxlength="80" required><label for="admin-producto-region">Región</label><input id="admin-producto-region" maxlength="40" required><div class="form-row"><div><label for="admin-producto-precio">Precio USD</label><input id="admin-producto-precio" type="number" min="0" step="0.01" required></div><div><label for="admin-producto-anterior">Precio anterior USD</label><input id="admin-producto-anterior" type="number" min="0" step="0.01"></div></div><label for="admin-producto-imagen">URL de portada</label><input id="admin-producto-imagen" type="text" pattern="(assets/.*|https://.*)" required><label class="check-row"><input id="admin-producto-publicado" type="checkbox"> Publicado</label><div class="form-actions"><button class="button button-primary" type="submit">Guardar producto</button><button class="button button-secondary" id="nuevo-producto" type="button">Limpiar</button></div></form><div id="admin-productos" class="admin-records"></div></section>
+        <section class="admin-panel"><h2>Plataformas y stock</h2><div id="admin-categorias" class="admin-records"></div><form id="formulario-claves" class="panel-form" novalidate><h3>Añadir claves ficticias</h3><label for="admin-claves-producto">Producto</label><select id="admin-claves-producto" required></select><label for="admin-claves-codigos">Códigos (uno por línea)</label><textarea id="admin-claves-codigos" rows="5" placeholder="DEMO-EJEMPLO-001" required></textarea><button class="button button-primary" type="submit">Añadir stock</button></form><h3>Claves disponibles</h3><div id="admin-claves" class="admin-records"></div></section>
+      </div>
+      <p id="admin-estado" class="auth-status" role="alert" hidden></p>
     </section>
 
     <section class="confirmation-view container" id="confirmacion" aria-labelledby="confirmacion-titulo" hidden>
       <nav class="breadcrumbs" aria-label="Ruta de navegación"><button type="button" data-show-store>Tienda</button><span aria-hidden="true">›</span><span aria-current="page">Confirmación</span></nav>
       <article class="confirmation-card">
         <span class="confirmation-check" aria-hidden="true"><svg class="icon"><use href="#icon-check"/></svg></span>
-        <h1 id="confirmacion-titulo" tabindex="-1">¡Pago simulado con éxito!</h1>
-        <p id="confirmacion-mensaje">Tu pedido de demostración está listo.</p>
+        <h1 id="confirmacion-titulo" tabindex="-1">¡Compra realizada con éxito!</h1>
+        <p id="confirmacion-mensaje">Tu pedido está listo.</p>
         <div class="delivered-games" id="juegos-entregados"></div>
         <dl class="order-meta">
-          <div><dt>Pedido</dt><dd id="numero-pedido">#GV-DEMO</dd></div>
+          <div><dt>Pedido</dt><dd id="numero-pedido">#GV</dd></div>
           <div><dt>Total</dt><dd class="confirmation-total" id="confirmacion-total">$0.00</dd></div>
           <div><dt>Método</dt><dd id="confirmacion-metodo">Tarjeta</dd></div>
-          <div><dt>Estado</dt><dd class="verified"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Simulado</dd></div>
+          <div><dt>Estado</dt><dd class="verified"><svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg> Confirmado</dd></div>
         </dl>
         <button class="button button-primary confirmation-home" type="button" data-show-store>Volver al inicio</button>
-        <p class="confirmation-help">¿Necesitas ayuda? <a href="#soporte" data-show-store>Contactar soporte</a></p>
+        <p class="confirmation-help">¿Necesitas ayuda? <a href="#soporte">Contactar soporte</a></p>
       </article>
     </section>
   </main>
@@ -274,7 +381,6 @@
       <div class="footer-about">
         <a class="brand" href="#inicio" aria-label="GameVault, volver al inicio"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#icon-game"/></svg></span><span>GAME<span class="brand-accent">VAULT</span></span></a>
         <p>Tu próximo juego empieza aquí. Explora títulos para PlayStation, Xbox y Nintendo Switch en un solo lugar.</p>
-        <span class="project-label">Demo académica · sin compras reales</span>
       </div>
       <nav class="footer-platforms" aria-labelledby="plataformas-titulo">
         <h2 id="plataformas-titulo">PLATAFORMAS</h2>
@@ -286,63 +392,14 @@
       </nav>
       <section class="footer-help" aria-labelledby="ayuda-titulo">
         <h2 id="ayuda-titulo">AYUDA Y PREGUNTAS FRECUENTES</h2>
-        <details id="canjear"><summary>Cómo canjear claves</summary><p>En la tienda de tu consola, abre la opción para canjear un código. Antes de usarlo, comprueba que corresponde a tu plataforma y región. Esta demo no entrega claves reales.</p></details>
-        <details id="reembolso"><summary>Garantía de 24 horas</summary><p>El proyecto contempla una garantía de 24 horas. Sus condiciones y el proceso de solicitud se definirán al implementar las compras. No se procesan pagos ni reembolsos en esta demo.</p></details>
-        <details id="soporte"><summary>Contactar con soporte</summary><p>Al habilitar el soporte podrás enviar el número de pedido y una descripción del problema. El envío de tickets se incorporará en una siguiente etapa.</p></details>
+        <details id="canjear"><summary>Cómo canjear claves</summary><p>En la tienda de tu consola, abre la opción para canjear un código. Antes de usarlo, comprueba que corresponde a tu plataforma y región.</p></details>
+        <details id="reembolso"><summary>Garantía de 24 horas</summary><p>Consulta las condiciones aplicables a tu pedido y conserva el número de compra para solicitar asistencia.</p></details>
+        <details id="soporte"><summary>Contactar con soporte</summary><p>Ten a mano el número de pedido y una descripción del problema para recibir asistencia.</p></details>
       </section>
     </div>
-    <div class="container footer-bottom"><p>© <span id="anio">2026</span> GameVault. Proyecto académico.</p><a href="#contenido">Volver al contenido <span aria-hidden="true">↑</span></a></div>
+    <div class="container footer-bottom"><p>© <span id="anio">2026</span> GameVault.</p><a href="#contenido">Volver al contenido <span aria-hidden="true">↑</span></a></div>
   </footer>
 
 
-  <dialog id="dialogo" class="product-dialog" aria-labelledby="dialogo-titulo">
-    <div class="dialog-header"><h2 id="dialogo-titulo" tabindex="-1"></h2><button class="icon-button" id="cerrar-dialogo" type="button" aria-label="Cerrar ventana"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div>
-    <div id="dialogo-contenido"></div>
-  </dialog>
-
-  <dialog id="carrito-dialogo" class="cart-dialog" aria-labelledby="carrito-titulo">
-    <div class="cart-dialog-header">
-      <div>
-        <p class="eyebrow cart-eyebrow">TU COMPRA</p>
-        <h2 id="carrito-titulo" tabindex="-1">Carrito de compras</h2>
-        <p class="cart-item-count" id="carrito-cantidad">0 productos</p>
-      </div>
-      <button class="icon-button" id="cerrar-carrito" type="button" aria-label="Cerrar carrito"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
-    </div>
-
-    <div class="cart-action-feedback" id="carrito-feedback" role="status" aria-live="polite" aria-atomic="true" hidden>
-      <p id="carrito-mensaje"></p><button class="text-button" id="carrito-deshacer" type="button">Deshacer</button><button class="icon-button" id="cerrar-carrito-feedback" type="button" aria-label="Cerrar aviso"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
-    </div>
-
-    <div class="cart-layout">
-      <section class="cart-products" aria-labelledby="productos-carrito-titulo">
-        <div class="cart-section-heading">
-          <h3 id="productos-carrito-titulo">Tus juegos</h3>
-          <button class="text-button cart-clear" id="vaciar-carrito" type="button" hidden>Vaciar carrito</button>
-        </div>
-        <div class="cart-empty" id="carrito-vacio">
-          <span class="cart-empty-icon" aria-hidden="true"><svg class="icon"><use href="#icon-cart"/></svg></span>
-          <h3>Tu carrito está vacío</h3>
-          <p>Explora el catálogo y encuentra tu próxima aventura.</p>
-          <button class="button button-primary" type="button" id="explorar-juegos">Explorar juegos</button>
-        </div>
-        <ul class="cart-list" id="lista-carrito" aria-label="Productos en el carrito"></ul>
-      </section>
-
-      <aside class="cart-summary" id="resumen-carrito" aria-labelledby="resumen-titulo" hidden>
-        <h3 id="resumen-titulo">Resumen del pedido</h3>
-        <dl class="cart-totals">
-          <div><dt>Subtotal</dt><dd id="carrito-subtotal">$0.00</dd></div>
-          <div id="fila-ahorro" hidden><dt>Ahorro</dt><dd class="cart-savings" id="carrito-ahorro">−$0.00</dd></div>
-          <div><dt>Entrega digital</dt><dd class="cart-free">Gratis</dd></div>
-          <div class="cart-total"><dt>Total</dt><dd id="carrito-total">$0.00 <small>USD</small></dd></div>
-        </dl>
-        <button class="button button-primary cart-checkout" id="continuar-pago" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg>Continuar al pago</button>
-        <p class="cart-secure"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Compra protegida y entrega digital</p>
-        <p class="cart-demo-note">Demo académica: no se realizará ningún cobro ni se entregarán claves reales.</p>
-        <p class="cart-checkout-message" id="mensaje-pago" role="status" aria-live="polite" hidden></p>
-      </aside>
-    </div>
-  </dialog>
 </body>
 </html>
