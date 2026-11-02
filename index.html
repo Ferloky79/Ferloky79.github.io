@@ -6,11 +6,12 @@
   <meta name="description" content="GameVault: catálogo de videojuegos para PlayStation, Xbox y Nintendo Switch.">
   <meta name="theme-color" content="#10121c">
   <title>GameVault · Tu próximo juego empieza aquí</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261101-2">
+  <style>body:not([data-view="inicio"]) #inicio { display: none !important; }</style>
   <script src="vendor/supabase-2.99.1.js" defer></script>
   <script src="supabase-config.js" defer></script>
   <script src="supabase-api.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=20261102-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
@@ -32,7 +33,7 @@
     <symbol id="icon-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
   </svg>
 
-  <header class="site-header" id="inicio">
+  <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="#inicio" aria-label="GameVault, inicio">
         <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#icon-game"/></svg></span>
@@ -64,11 +65,38 @@
   </header>
 
   <main id="contenido" tabindex="-1">
+    <section class="home-intro" id="inicio" aria-labelledby="inicio-titulo">
+      <div class="container home-intro-inner">
+        <div class="home-copy">
+          <p class="eyebrow home-eyebrow">TU BIBLIOTECA DIGITAL EMPIEZA AQUÍ</p>
+          <h1 id="inicio-titulo">Encuentra tu próxima gran historia</h1>
+          <p class="home-description">Explora videojuegos para PlayStation, Xbox y Nintendo Switch en una tienda clara, rápida y pensada para descubrir.</p>
+          <div class="home-actions">
+            <a class="button button-primary" href="#catalogo">Explorar catálogo</a>
+            <a class="button button-secondary" href="#oferta">Ver oferta destacada</a>
+          </div>
+          <ul class="home-benefits" aria-label="Ventajas de GameVault">
+            <li><strong>3</strong><span>plataformas</span></li>
+            <li><strong>100%</strong><span>entrega digital</span></li>
+            <li><strong>24 h</strong><span>ayuda disponible</span></li>
+          </ul>
+        </div>
+        <div class="home-visual" aria-hidden="true">
+          <div class="vault-orbit vault-orbit-outer"></div>
+          <div class="vault-orbit vault-orbit-inner"></div>
+          <div class="vault-core"><svg class="icon"><use href="#icon-game"/></svg><span>GAME<br>VAULT</span></div>
+          <span class="visual-chip chip-ps">PS5</span>
+          <span class="visual-chip chip-xbox">XBOX</span>
+          <span class="visual-chip chip-switch">SWITCH</span>
+        </div>
+      </div>
+    </section>
+
     <section class="hero" id="oferta" aria-labelledby="hero-titulo">
       <div class="container hero-inner">
         <div class="hero-copy">
           <span class="eyebrow offer-badge">OFERTA DESTACADA</span>
-          <h1 id="hero-titulo">Forza Motorsport</h1>
+          <h2 id="hero-titulo">Forza Motorsport</h2>
           <p class="hero-description" id="hero-descripcion">Vive la emoción de la pista. Encuentra tu próximo desafío en nuestro catálogo de videojuegos.</p>
           <div class="hero-price" id="hero-precio"></div>
           <div class="hero-actions">
@@ -77,7 +105,7 @@
           </div>
         </div>
         <figure class="hero-art">
-          <img src="assets/forza.jpg" alt="Portada de Forza Motorsport" width="460" height="215" fetchpriority="high">
+          <img src="assets/forza.jpg" alt="Portada del videojuego Forza Motorsport" width="460" height="215" fetchpriority="high">
           <figcaption><span class="availability-dot" aria-hidden="true"></span> Xbox Series X|S <span aria-hidden="true">·</span> Clave digital</figcaption>
         </figure>
       </div>
@@ -132,7 +160,7 @@
         <span aria-current="page">Detalle del videojuego</span>
       </nav>
       <div class="product-view-heading">
-        <div><p class="eyebrow">DETALLE DEL VIDEOJUEGO</p><h1 id="detalle-titulo" tabindex="-1"></h1></div>
+        <div><p class="eyebrow">DETALLE DEL VIDEOJUEGO</p><h1 id="detalle-titulo" tabindex="-1">Detalle del videojuego</h1></div>
         <a class="button button-secondary" href="#catalogo">Volver al catálogo</a>
       </div>
       <div class="product-view-content" id="detalle-contenido"></div>

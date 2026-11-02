@@ -76,7 +76,7 @@ function crearPrecio(juego, clase) {
 function crearImagen(juego, clase = "") {
   const imagen = elemento("img", clase);
   imagen.src = juego.imagen;
-  imagen.alt = `Portada de ${juego.titulo}`;
+  imagen.alt = `Portada del videojuego ${juego.titulo}`;
   imagen.loading = "lazy";
   imagen.decoding = "async";
   imagen.addEventListener("error", () => {
@@ -293,12 +293,11 @@ function renderizarCarrito() {
   juegos.forEach((juego) => fragmento.append(crearFilaCarrito(juego)));
   $("lista-carrito").replaceChildren(fragmento);
 
-  const subtotal = juegos.reduce((total, juego) => total + juego.precioCentavos, 0);
-  const ahorro = juegos.reduce((total, juego) => total + Math.max(0, (juego.precioAnteriorCentavos || juego.precioCentavos) - juego.precioCentavos), 0);
+  const { subtotal, ahorro, total } = calcularTotales(juegos);
   $("carrito-subtotal").textContent = formatoPrecio(subtotal);
   $("carrito-ahorro").textContent = `−${formatoPrecio(ahorro)}`;
   $("fila-ahorro").hidden = ahorro === 0;
-  $("carrito-total").replaceChildren(document.createTextNode(`${formatoPrecio(subtotal)} `), elemento("small", "", "USD"));
+  $("carrito-total").replaceChildren(document.createTextNode(`${formatoPrecio(total)} `), elemento("small", "", "USD"));
 }
 
 function obtenerJuegosCarrito() {
@@ -306,9 +305,11 @@ function obtenerJuegosCarrito() {
 }
 
 function calcularTotales(juegos) {
-  const subtotal = juegos.reduce((total, juego) => total + juego.precioCentavos, 0);
+  const subtotal = juegos.reduce((acumulado, juego) =>
+    acumulado + Math.max(juego.precioCentavos, juego.precioAnteriorCentavos || 0), 0);
   const ahorro = juegos.reduce((total, juego) => total + Math.max(0, (juego.precioAnteriorCentavos || juego.precioCentavos) - juego.precioCentavos), 0);
-  return { subtotal, ahorro };
+  const total = subtotal - ahorro;
+  return { subtotal, ahorro, total };
 }
 
 function crearItemCheckout(juego) {
@@ -321,14 +322,14 @@ function crearItemCheckout(juego) {
 
 function renderizarCheckout() {
   const juegos = obtenerJuegosCarrito();
-  const { subtotal, ahorro } = calcularTotales(juegos);
+  const { subtotal, ahorro, total } = calcularTotales(juegos);
   $("checkout-productos").replaceChildren(...juegos.map(crearItemCheckout));
   $("checkout-cantidad").textContent = `${juegos.length} ${juegos.length === 1 ? "juego" : "juegos"}`;
   $("checkout-subtotal").textContent = formatoPrecio(subtotal);
   $("checkout-ahorro").textContent = `−${formatoPrecio(ahorro)}`;
   $("checkout-fila-ahorro").hidden = ahorro === 0;
-  $("checkout-total").textContent = formatoPrecio(subtotal);
-  $("pagar-total").textContent = formatoPrecio(subtotal);
+  $("checkout-total").textContent = formatoPrecio(total);
+  $("pagar-total").textContent = formatoPrecio(total);
   $("pagar").disabled = juegos.length === 0;
   if (usuarioActual && !$("correo-entrega").value) $("correo-entrega").value = usuarioActual.email;
   $("error-formulario").hidden = juegos.length > 0;
@@ -347,6 +348,7 @@ function mostrarVista(vista, destino = null, actualizarUrl = true) {
   if (actualizarUrl && location.hash !== hash) history.pushState(null, "", hash);
   const enInicio = vista === "inicio";
   const enCatalogo = vista === "catalogo";
+  $("inicio").hidden = !enInicio;
   $("oferta").hidden = !enInicio;
   $("catalogo").hidden = !enCatalogo;
   $("detalle").hidden = vista !== "detalle";
@@ -494,7 +496,7 @@ async function finalizarCompra() {
     const ids = [...estado.seleccion].sort((a,b) => a-b);
     const datos = { p_ids: ids, p_correo: $("correo-entrega").value.trim(),
       p_metodo: document.querySelector('input[name="metodo"]:checked').value,
-      p_total: calcularTotales(obtenerJuegosCarrito()).subtotal };
+      p_total: calcularTotales(obtenerJuegosCarrito()).total };
     const firma = JSON.stringify([usuarioActual?.id || null, datos]);
     if (!solicitudCompra || firmaCompra !== firma) {
       solicitudCompra = { ...datos, p_id: crypto.randomUUID(), p_comprobante: crypto.randomUUID() + crypto.randomUUID() };
@@ -1066,7 +1068,7 @@ async function iniciar() {
     if (destacado) {
       $("hero-titulo").textContent = destacado.titulo;
       document.querySelector('.hero-art img').src = destacado.imagen;
-      document.querySelector('.hero-art img').alt = `Portada de ${destacado.titulo}`;
+      document.querySelector('.hero-art img').alt = `Portada del videojuego ${destacado.titulo}`;
       document.querySelector('.hero-art figcaption').textContent = plataformas[destacado.plataforma].nombre + ' · Clave digital';
       $("hero-descripcion").textContent = destacado.descripcion;
       const precio = crearPrecio(destacado, "hero-price");

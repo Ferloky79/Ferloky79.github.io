@@ -72,9 +72,16 @@ window.GameVaultAPI = (() => {
     await page.waitForFunction(()=>document.querySelectorAll('.game-card').length===13);
     assert.equal(await page.locator('.game-card').count(),13);
     assert.equal(await page.locator('body').getAttribute('data-view'),'inicio');
+    assert.equal(await page.locator('#inicio-titulo').textContent(),'Encuentra tu próxima gran historia');
+    assert.equal(await page.locator('#inicio').isVisible(),true);
+    assert.equal(await page.locator('#oferta').isVisible(),true);
+    assert.equal(await page.locator('img:not([alt])').count(),0);
+    assert.equal(await page.locator('img[alt=""]').count(),0);
     assert.equal(await page.locator('#hero-titulo').textContent(),'Marvel’s Wolverine');
     await page.locator('.main-nav a[href="#catalogo"]').click();
     await page.waitForFunction(()=>document.body.dataset.view==='catalogo');
+    assert.equal(await page.locator('#inicio').isHidden(),true);
+    assert.equal(await page.locator('#oferta').isHidden(),true);
     await page.locator('[data-platform="switch"]').click();
     assert.equal(await page.locator('.game-card').count(),3);
     await page.locator('#buscar').fill('Mario Kart');
@@ -83,6 +90,7 @@ window.GameVaultAPI = (() => {
     await page.locator('#restablecer').evaluate(b=>b.click());
     await page.locator('[data-details="1"]').first().click();
     await page.waitForFunction(()=>document.body.dataset.view==='detalle');
+    assert.equal(await page.locator('#inicio').isHidden(),true);
     assert.equal(new URL(page.url()).hash,'#producto/1');
     await page.reload();
     await page.waitForFunction(()=>document.body.dataset.view==='detalle');
@@ -94,6 +102,9 @@ window.GameVaultAPI = (() => {
     await page.locator('#abrir-carrito').click();
     assert.equal(new URL(page.url()).hash,'#carrito');
     assert.equal(await page.locator('#lista-carrito .cart-item').count(),1);
+    assert.equal(await page.locator('#carrito-subtotal').textContent(),'$99.99');
+    assert.equal(await page.locator('#carrito-ahorro').textContent(),'−$40.00');
+    assert.match(await page.locator('#carrito-total').textContent(),/^\$59\.99\s+USD$/);
     await page.locator('#carrito [data-cart-remove="1"]').click();
     await page.locator('#carrito-deshacer').click();
     assert.equal(await page.locator('#lista-carrito .cart-item').count(),1);
@@ -130,6 +141,10 @@ window.GameVaultAPI = (() => {
     await page.locator('#perfil [data-open-cart]').click();
     await page.waitForFunction(()=>document.body.dataset.view==='carrito');
     await page.locator('#continuar-pago').click();
+    assert.equal(await page.locator('#checkout-subtotal').textContent(),'$99.99');
+    assert.equal(await page.locator('#checkout-ahorro').textContent(),'−$40.00');
+    assert.equal(await page.locator('#checkout-total').textContent(),'$59.99');
+    assert.equal(await page.locator('#pagar-total').textContent(),'$59.99');
     await page.locator('.payment-option').filter({has:page.locator('input[value="paypal"]')}).click();
     await page.evaluate(()=>window.__fallarCompra=true);
     await page.locator('#pagar').click();
