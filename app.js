@@ -10,6 +10,9 @@ const plataformas = {
 const moneda = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 const estado = { busqueda: "", plataforma: "todos", orden: "destacados", seleccion: new Set(), ultimaAccion: null };
 const CLAVE_CARRITO = "gamevault:carrito-invitado";
+const CLAVE_RETORNO = "gamevault:retorno-login";
+const PAGINA = document.body.dataset.page || "inicio";
+const ARCHIVOS = { inicio: "index.html", catalogo: "catalogo.html", detalle: "producto.html", carrito: "carrito.html", checkout: "checkout.html", confirmacion: "confirmacion.html", cuenta: "login.html", login: "login.html", registro: "registro.html", perfil: "perfil.html", soporte: "soporte.html", ticket: "ticket.html", admin: "admin.html" };
 let colaCarrito = Promise.resolve();
 let cargandoCuenta = false;
 let cambiandoSesion = false;
@@ -130,6 +133,7 @@ function crearTarjeta(juego) {
 }
 
 function renderizarCatalogo() {
+  if (!$('lista-juegos')) return;
   const consulta = normalizar(estado.busqueda);
   const juegos = catalogo.filter((juego) =>
     (estado.plataforma === "todos" || juego.plataforma === estado.plataforma) &&
@@ -157,6 +161,7 @@ function filtrarPlataforma(plataforma) {
 }
 function actualizarFlechas() {
   const lista = $("lista-juegos");
+  if (!lista) return;
   $("anterior").disabled = lista.scrollLeft <= 2;
   $("siguiente").disabled = lista.scrollLeft + lista.clientWidth >= lista.scrollWidth - 2;
 }
@@ -173,6 +178,7 @@ function avisar(mensaje, permitirDeshacer = false) {
   $("deshacer").hidden = !permitirDeshacer;
 }
 function avisarCarrito(mensaje, permitirDeshacer = false) {
+  if (!$("carrito-feedback")) { avisar(mensaje, permitirDeshacer); return; }
   $("carrito-feedback").hidden = false;
   $("carrito-mensaje").textContent = mensaje;
   $("carrito-deshacer").hidden = !permitirDeshacer;
@@ -225,9 +231,9 @@ function actualizarSeleccion() {
   $("contador-carrito").textContent = cantidad;
   $("abrir-carrito").setAttribute("aria-label", `Abrir carrito, ${cantidad} ${cantidad === 1 ? "juego" : "juegos"}`);
   guardarCarrito();
-  renderizarCarrito();
-  if (document.body.dataset.view === "checkout") renderizarCheckout();
-  if (usuarioActual) renderizarPerfil();
+  if ($("carrito")) renderizarCarrito();
+  if ($("checkout")) renderizarCheckout();
+  if (usuarioActual && $("perfil")) renderizarPerfil();
   actualizarBotonesAgregar();
 }
 
@@ -279,6 +285,7 @@ function crearFilaCarrito(juego) {
 }
 
 function renderizarCarrito() {
+  if (!$("carrito")) return;
   const juegos = obtenerJuegosCarrito();
   const cantidad = juegos.length;
   const vacio = cantidad === 0;
@@ -321,6 +328,7 @@ function crearItemCheckout(juego) {
 }
 
 function renderizarCheckout() {
+  if (!$("checkout")) return;
   const juegos = obtenerJuegosCarrito();
   const { subtotal, ahorro, total } = calcularTotales(juegos);
   $("checkout-productos").replaceChildren(...juegos.map(crearItemCheckout));
@@ -336,54 +344,37 @@ function renderizarCheckout() {
   if (!juegos.length) $("error-formulario").textContent = "Tu carrito está vacío. Vuelve al catálogo para agregar un juego.";
 }
 
-function hashDeVista(vista, destino = null) {
-  if (vista === "inicio") return destino && destino.startsWith("#") ? destino : "#inicio";
-  if (vista === "catalogo") return "#catalogo";
-  if (vista === "detalle") return `#producto/${destino}`;
-  return `#${vista}`;
+function urlDeVista(vista, destino = null) {
+  if (vista === "detalle") return `producto.html?id=${encodeURIComponent(destino)}`;
+  if (vista === "ticket") return `ticket.html?id=${encodeURIComponent(destino)}`;
+  if (vista === "inicio" && destino?.startsWith("#")) return `index.html${destino}`;
+  return ARCHIVOS[vista] || "index.html";
 }
 
-function mostrarVista(vista, destino = null, actualizarUrl = true) {
-  const hash = hashDeVista(vista, destino);
-  if (actualizarUrl && location.hash !== hash) history.pushState(null, "", hash);
-  const enInicio = vista === "inicio";
-  const enCatalogo = vista === "catalogo";
-  $("inicio").hidden = !enInicio;
-  $("oferta").hidden = !enInicio;
-  $("catalogo").hidden = !enCatalogo;
-  $("detalle").hidden = vista !== "detalle";
-  $("carrito").hidden = vista !== "carrito";
-  $("checkout").hidden = vista !== "checkout";
-  $("confirmacion").hidden = vista !== "confirmacion";
-  $("cuenta").hidden = vista !== "cuenta";
-  $("perfil").hidden = vista !== "perfil";
-  $("soporte-vista").hidden = vista !== "soporte";
-  $("ticket-vista").hidden = vista !== "ticket";
-  $("admin").hidden = vista !== "admin";
+function mostrarVista(vista, destino = null) {
+  const paginaObjetivo = vista === "detalle" ? "producto" : vista === "cuenta" ? "login" : vista;
+  if (PAGINA !== paginaObjetivo) {
+    location.href = urlDeVista(vista, destino);
+    return false;
+  }
   document.body.dataset.view = vista;
-  requestAnimationFrame(() => {
-    if (vista === "checkout") $("checkout-titulo").focus({ preventScroll: true });
-    if (vista === "detalle") $("detalle-titulo").focus({ preventScroll: true });
-    if (vista === "carrito") $("carrito-titulo").focus({ preventScroll: true });
-    if (vista === "confirmacion") $("confirmacion-titulo").focus({ preventScroll: true });
-    if (vista === "cuenta") $("cuenta-titulo").focus({ preventScroll: true });
-    if (vista === "perfil") $("perfil-titulo").focus({ preventScroll: true });
-    if (vista === "soporte") $("soporte-titulo").focus({ preventScroll: true });
-    if (vista === "admin") $("admin-titulo").focus({ preventScroll: true });
-    const objetivo = (enInicio || enCatalogo) && destino && document.querySelector(destino);
-    (objetivo || $("contenido")).scrollIntoView({ block: "start" });
-  });
+  const titulo = $(`${vista === "detalle" ? "detalle" : vista === "cuenta" ? "cuenta" : vista}-titulo`);
+  requestAnimationFrame(() => titulo?.focus({ preventScroll: true }));
+  return true;
 }
 
 function abrirCheckout() {
   if (!estado.seleccion.size) return;
-  renderizarCheckout();
+  if (!usuarioActual) {
+    sessionStorage.setItem(CLAVE_RETORNO, "checkout.html");
+    location.href = "login.html";
+    return;
+  }
   mostrarVista("checkout");
 }
 
 function abrirCarritoDialogo() {
-  renderizarCarrito();
-  $("carrito-feedback").hidden = true;
+  if ($("carrito-feedback")) $("carrito-feedback").hidden = true;
   mostrarVista("carrito");
 }
 
@@ -479,6 +470,11 @@ function crearJuegoEntregado(juego) {
 
 function renderizarConfirmacion(pedido) {
   ultimoPedido = pedido;
+  if (!$('confirmacion')) {
+    if (pedido.id) sessionStorage.setItem('gamevault:ultimo-comprobante', JSON.stringify({ id: pedido.id }));
+    location.href = "confirmacion.html";
+    return;
+  }
   $("juegos-entregados").replaceChildren(...pedido.juegos.map(crearJuegoEntregado));
   $("confirmacion-mensaje").textContent = `Pedido registrado para ${pedido.email}. Tus claves digitales están listas para copiar.`;
   $("numero-pedido").textContent = pedido.numero;
@@ -598,12 +594,13 @@ function actualizarCuentaUI() {
   boton.dataset.authenticated = String(Boolean(usuarioActual));
   boton.setAttribute("aria-label", usuarioActual ? `Abrir perfil de ${usuarioActual.nombre}` : "Iniciar sesión o registrarse");
   boton.title = usuarioActual ? `Perfil de ${usuarioActual.nombre}` : "Mi cuenta";
+  boton.href = usuarioActual ? "perfil.html" : "login.html";
   $("nav-admin").hidden = !usuarioActual?.esAdmin;
-  $("perfil-admin").hidden = !usuarioActual?.esAdmin;
+  if ($("perfil-admin")) $("perfil-admin").hidden = !usuarioActual?.esAdmin;
 }
 
 function renderizarPerfil() {
-  if (!usuarioActual) return;
+  if (!usuarioActual || !$("perfil")) return;
   $("perfil-iniciales").textContent = iniciales(usuarioActual.nombre);
   $("perfil-nombre").textContent = usuarioActual.nombre;
   $("perfil-email").textContent = usuarioActual.email;
@@ -628,6 +625,7 @@ function renderizarPerfil() {
 }
 
 function seleccionarAuthTab(tab, enfocar = false) {
+  if (!$("panel-login") || !$("panel-registro") || !$("tab-login") || !$("tab-registro")) return;
   const login = tab === "login";
   $("panel-login").hidden = !login;
   $("panel-registro").hidden = login;
@@ -640,10 +638,8 @@ function seleccionarAuthTab(tab, enfocar = false) {
 
 function mostrarCuenta() {
   if (usuarioActual) {
-    renderizarPerfil();
     mostrarVista("perfil");
   } else {
-    seleccionarAuthTab("login");
     mostrarVista("cuenta");
   }
 }
@@ -663,7 +659,10 @@ async function iniciarSesion() {
     await colaCarrito.catch(() => {});
     const { user } = await api.login($("login-email").value.trim(), $("login-clave").value);
     await cargarCuenta(user, true); actualizarSeleccion();
-    form.reset(); $("estado-login").hidden = true; mostrarVista("perfil");
+    form.reset(); $("estado-login").hidden = true;
+    const retorno = sessionStorage.getItem(CLAVE_RETORNO);
+    sessionStorage.removeItem(CLAVE_RETORNO);
+    location.href = retorno && /^(checkout|perfil|ticket|admin)\.html(?:\?[^#]*)?$/.test(retorno) ? retorno : "perfil.html";
   } catch (error) { $("estado-login").textContent = mensajeError(error); $("estado-login").classList.remove("is-success"); $("estado-login").hidden = false; }
   finally { boton.disabled = false; cambiandoSesion = false; }
 }
@@ -680,11 +679,10 @@ async function registrarCuenta() {
   try {
     const { user, session } = await api.registro($("registro-nombre").value.trim(), $("registro-email").value.trim(), clave);
     form.reset();
-    if (session) { await cargarCuenta(user,true); actualizarSeleccion(); mostrarVista("perfil"); }
+    if (session) { await cargarCuenta(user,true); actualizarSeleccion(); location.href = "perfil.html"; }
     else {
-      seleccionarAuthTab("login");
-      $("estado-login").textContent = "Revisa tu correo para confirmar la cuenta y después inicia sesión. Si ya tenías cuenta, usa tus credenciales.";
-      $("estado-login").classList.add("is-success"); $("estado-login").hidden = false;
+      $("estado-registro").textContent = "Revisa tu correo para confirmar la cuenta y después inicia sesión.";
+      $("estado-registro").classList.add("is-success"); $("estado-registro").hidden = false;
     }
   } catch (error) { $("estado-registro").textContent = mensajeError(error); $("estado-registro").hidden = false; }
   finally { boton.disabled = false; cambiandoSesion = false; }
@@ -694,10 +692,10 @@ async function cerrarSesion() {
   try {
     await colaCarrito.catch(() => {});
     await api.salir(); await cargarCuenta(null); actualizarSeleccion();
-    $("correo-entrega").value = ""; $("juegos-entregados").replaceChildren(); ultimoPedido = null;
+    ultimoPedido = null;
     solicitudCompra = null; firmaCompra = null;
     sessionStorage.removeItem('gamevault:ultimo-comprobante'); sessionStorage.removeItem('gamevault:compra-pendiente');
-    seleccionarAuthTab("login"); mostrarVista("cuenta");
+    location.href = "login.html";
   } catch (error) { avisar(mensajeError(error)); }
   finally { $("cerrar-sesion").disabled = false; cambiandoSesion = false; }
 }
@@ -711,6 +709,7 @@ function abrirDialogo(titulo, contenido) {
 function mostrarDetalles(id) {
   const juego = catalogo.find((item) => item.id === Number(id));
   if (!juego) return;
+  if (PAGINA !== "producto") { location.href = `producto.html?id=${encodeURIComponent(juego.id)}`; return; }
   const contenido = document.createDocumentFragment();
   const copia = elemento("div", "product-copy");
   const datos = elemento("dl", "product-facts");
@@ -752,7 +751,7 @@ async function cargarResenas(idProducto) {
     if (!usuarioActual) {
       const aviso = elemento("div", "review-form login-required");
       aviso.append(elemento("p", "", "Inicia sesión para publicar tu reseña. Tu nombre visible aparecerá junto a ella."));
-      const enlace = elemento("a", "button button-secondary", "Iniciar sesión"); enlace.href = "#cuenta"; aviso.append(enlace); formulario.append(aviso);
+      const enlace = elemento("a", "button button-secondary", "Iniciar sesión"); enlace.href = "login.html"; aviso.append(enlace); formulario.append(aviso);
     } else {
       const form = elemento("form", "review-form"); form.id = "formulario-resena";
       const titulo = elemento("h3", "", propia ? "Edita tu reseña" : "Escribe una reseña");
@@ -789,7 +788,7 @@ async function ejecutarResena(operacion, idProducto, boton = null, salida = null
 }
 
 async function cargarSoporte() {
-  mostrarVista("soporte", null, false);
+  if (PAGINA !== "soporte") return;
   const sinSesion = !usuarioActual;
   $("soporte-sesion").hidden = !sinSesion; $("soporte-contenido").hidden = sinSesion;
   if (sinSesion) return;
@@ -803,15 +802,15 @@ async function listarTickets() {
     const tickets = await api.tickets(); lista.replaceChildren();
     if (!tickets.length) lista.append(elemento("p", "empty-inline", "No hay tickets para mostrar."));
     tickets.forEach(t => {
-      const enlace = elemento("a", "ticket-card"); enlace.href = `#ticket/${t.id_ticket}`;
+      const enlace = elemento("a", "ticket-card"); enlace.href = `ticket.html?id=${encodeURIComponent(t.id_ticket)}`;
       const cabecera = elemento("div", "ticket-card-heading"); cabecera.append(elemento("strong", "", t.asunto), elemento("span", `status status-${t.estado.toLocaleLowerCase("es")}`, estadoVisible(t.estado)));
       enlace.append(cabecera, elemento("span", "", `${t.numero} · ${t.categoria} · ${fechaLegible(t.actualizado_en)}`)); lista.append(enlace);
     });
   } catch (error) { lista.replaceChildren(elemento("p", "error-state", mensajeError(error))); }
 }
 async function abrirTicket(id) {
-  if (!usuarioActual) { history.replaceState(null, "", "#cuenta"); mostrarVista("cuenta", null, false); return; }
-  mostrarVista("ticket", id, false); const destino = $("ticket-detalle"); destino.replaceChildren(elemento("p", "loading-state", "Cargando conversación…"));
+  if (!usuarioActual) { sessionStorage.setItem(CLAVE_RETORNO, `ticket.html?id=${encodeURIComponent(id)}`); location.replace("login.html"); return; }
+  const destino = $("ticket-detalle"); destino.replaceChildren(elemento("p", "loading-state", "Cargando conversación…"));
   try {
     const [ticket, mensajes] = await Promise.all([api.ticket(id), api.mensajesTicket(id)]);
     const frag = document.createDocumentFragment(); const cab = elemento("div", "view-heading ticket-heading"); const info = elemento("div"); const h = elemento("h1", "", ticket.asunto); h.id = "ticket-titulo"; h.tabIndex = -1; info.append(elemento("p", "eyebrow", ticket.numero), h, elemento("p", "", `${ticket.categoria} · ${fechaLegible(ticket.creado_en)}`)); cab.append(info);
@@ -829,7 +828,8 @@ async function abrirTicket(id) {
 
 function adminEstado(mensaje, error = false) { const salida = $("admin-estado"); salida.textContent = mensaje; salida.classList.toggle("is-error", error); salida.hidden = false; }
 async function cargarAdmin() {
-  mostrarVista("admin", null, false); const autorizado = Boolean(usuarioActual?.esAdmin);
+  if (PAGINA !== "admin") return;
+  const autorizado = Boolean(usuarioActual?.esAdmin);
   $("admin-denegado").hidden = autorizado; $("admin-contenido").hidden = !autorizado;
   if (!autorizado) return;
   try { datosAdmin = await api.adminCatalogo(); renderizarAdmin(); }
@@ -1031,7 +1031,7 @@ function conectarEventos() {
   $("cerrar-aviso").addEventListener("click", () => { $("feedback").hidden = true; $("abrir-carrito").focus(); });
 }
 
-async function iniciar() {
+async function iniciarLegado() {
   conectarEventos();
   document.body.dataset.view = "cargando";
   actualizarMetodoPago();
@@ -1120,4 +1120,139 @@ async function iniciar() {
     console.error("Error al cargar el catálogo:", error);
   }
 }
+
+// Inicialización multipágina: solo conecta controles presentes en el documento.
+function conectarEventos() {
+  const al = (id, evento, fn) => $(id)?.addEventListener(evento, fn);
+  let temporizadorBusqueda;
+  if ($("buscar")) {
+    const parametros = new URLSearchParams(location.search);
+    $("buscar").value = parametros.get("q") || "";
+    al("busqueda-form", "submit", (evento) => {
+      if (PAGINA !== "catalogo") return;
+      evento.preventDefault();
+      estado.busqueda = $("buscar").value.trim();
+      history.pushState(null, "", estado.busqueda ? `?q=${encodeURIComponent(estado.busqueda)}` : "catalogo.html");
+      renderizarCatalogo();
+    });
+    if (PAGINA === "catalogo") al("buscar", "input", () => {
+      clearTimeout(temporizadorBusqueda);
+      temporizadorBusqueda = setTimeout(() => { estado.busqueda = $("buscar").value.trim(); renderizarCatalogo(); }, 220);
+    });
+  }
+  document.querySelectorAll("[data-platform]").forEach(boton => boton.addEventListener("click", () => filtrarPlataforma(boton.dataset.platform)));
+  al("ordenar", "change", () => { estado.orden = $("ordenar").value; renderizarCatalogo(); });
+  al("restablecer", "click", () => { $("buscar").value = ""; estado.busqueda = ""; estado.orden = "destacados"; $("ordenar").value = "destacados"; filtrarPlataforma("todos"); history.replaceState(null, "", "catalogo.html"); $("buscar").focus(); });
+  al("anterior", "click", () => desplazarCatalogo(-1));
+  al("siguiente", "click", () => desplazarCatalogo(1));
+  al("lista-juegos", "scroll", actualizarFlechas);
+  if ($("lista-juegos") && window.ResizeObserver) new ResizeObserver(actualizarFlechas).observe($("lista-juegos"));
+
+  document.addEventListener("click", (evento) => {
+    const copiar = evento.target.closest("button[data-copy-code]");
+    if (copiar) {
+      const salida = copiar.parentElement.nextElementSibling;
+      navigator.clipboard?.writeText(copiar.dataset.copyCode).then(() => { salida.textContent = "Código copiado."; }).catch(() => { salida.textContent = "Selecciona el código manualmente."; });
+      return;
+    }
+    const boton = evento.target.closest("button[data-add], button[data-details], button[data-cart-remove]");
+    if (!boton) return;
+    if (boton.dataset.add) agregarAlCarrito(boton.dataset.add);
+    if (boton.dataset.details) mostrarDetalles(boton.dataset.details);
+    if (boton.dataset.cartRemove) quitarDeSeleccion(Number(boton.dataset.cartRemove));
+  });
+  al("cerrar-aviso", "click", () => { $("feedback").hidden = true; });
+  al("deshacer", "click", deshacerUltimaAccion);
+  al("cerrar-carrito-feedback", "click", () => { $("carrito-feedback").hidden = true; });
+  al("carrito-deshacer", "click", deshacerUltimaAccion);
+  al("vaciar-carrito", "click", vaciarCarrito);
+  al("continuar-pago", "click", abrirCheckout);
+
+  document.querySelectorAll('input[name="metodo"]').forEach(radio => radio.addEventListener("change", actualizarMetodoPago));
+  al("numero-tarjeta", "input", evento => { const d = evento.target.value.replace(/\D/g, "").slice(0, 19); evento.target.value = d.replace(/(.{4})/g, "$1 ").trim(); });
+  al("fecha-tarjeta", "input", evento => { const d = evento.target.value.replace(/\D/g, "").slice(0, 4); evento.target.value = d.length > 2 ? `${d.slice(0, 2)} / ${d.slice(2)}` : d; });
+  al("cvv-tarjeta", "input", evento => { evento.target.value = evento.target.value.replace(/\D/g, "").slice(0, 4); });
+  al("formulario-pago", "submit", evento => {
+    evento.preventDefault();
+    if (!estado.seleccion.size) { $("error-formulario").textContent = "Tu carrito está vacío. Vuelve al catálogo para agregar un juego."; $("error-formulario").hidden = false; return; }
+    if (!validarCheckout()) { $("error-formulario").textContent = "Revisa los campos marcados antes de continuar."; $("error-formulario").hidden = false; $("formulario-pago").querySelector(":invalid")?.focus(); return; }
+    $("error-formulario").hidden = true; void finalizarCompra();
+  });
+
+  document.querySelectorAll("[data-toggle-password]").forEach(control => control.addEventListener("click", () => { const campo = $(control.dataset.togglePassword); const mostrar = campo.type === "password"; campo.type = mostrar ? "text" : "password"; control.textContent = mostrar ? "Ocultar" : "Mostrar"; control.setAttribute("aria-pressed", String(mostrar)); campo.focus(); }));
+  al("formulario-login", "submit", evento => { evento.preventDefault(); void iniciarSesion(); });
+  al("formulario-registro", "submit", evento => { evento.preventDefault(); void registrarCuenta(); });
+  al("cerrar-sesion", "click", cerrarSesion);
+  al("actualizar-tickets", "click", listarTickets);
+  al("formulario-ticket", "submit", async evento => {
+    evento.preventDefault(); const form = evento.currentTarget, boton = form.querySelector('[type="submit"]'), salida = $("ticket-form-estado");
+    if (!form.reportValidity()) return; boton.disabled = true; salida.hidden = true;
+    try { const creado = await api.crearTicket({ asunto: $("ticket-asunto").value.trim(), descripcion: $("ticket-descripcion").value.trim(), categoria: $("ticket-categoria").value, id_pedido: $("ticket-pedido").value || null }); location.href = `ticket.html?id=${encodeURIComponent(creado.id_ticket)}`; }
+    catch (error) { salida.textContent = mensajeError(error); salida.hidden = false; } finally { boton.disabled = false; }
+  });
+  al("recargar-admin", "click", cargarAdmin);
+  al("nuevo-juego", "click", () => rellenarJuego());
+  al("nuevo-producto", "click", () => rellenarProducto());
+  al("formulario-videojuego", "submit", async evento => { evento.preventDefault(); const form=evento.currentTarget;if(!form.reportValidity())return;const boton=form.querySelector('[type="submit"]');boton.disabled=true;try{await api.guardarVideojuego(Number($("admin-juego-id").value)||null,{titulo:$("admin-juego-titulo").value.trim(),descripcion:$("admin-juego-descripcion").value.trim(),valoracion_referencia:Number($("admin-juego-valoracion").value)});rellenarJuego();await recargarAdmin("Videojuego guardado.");}catch(error){adminEstado(mensajeError(error),true);}finally{boton.disabled=false;} });
+  al("formulario-producto", "submit", async evento => { evento.preventDefault();const form=evento.currentTarget;if(!form.reportValidity())return;const precio=Math.round(Number($("admin-producto-precio").value)*100),texto=$("admin-producto-anterior").value,anterior=texto?Math.round(Number(texto)*100):null;if(anterior!==null&&anterior<=precio){adminEstado("El precio anterior debe ser mayor que el actual.",true);return;}const boton=form.querySelector('[type="submit"]');boton.disabled=true;try{await api.guardarProducto(Number($("admin-producto-id").value)||null,{id_videojuego:Number($("admin-producto-juego").value),id_categoria:Number($("admin-producto-categoria").value),edicion:$("admin-producto-edicion").value.trim(),region:$("admin-producto-region").value.trim(),precio_centavos:precio,precio_anterior_centavos:anterior,imagen_url:$("admin-producto-imagen").value.trim(),publicado:$("admin-producto-publicado").checked});rellenarProducto();await recargarAdmin("Producto guardado.");}catch(error){adminEstado(mensajeError(error),true);}finally{boton.disabled=false;} });
+  al("formulario-claves", "submit", async evento => { evento.preventDefault();const form=evento.currentTarget;if(!form.reportValidity())return;const codigos=[...new Set($("admin-claves-codigos").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];if(!codigos.length||codigos.some(x=>!x.startsWith("DEMO-")||x.length>120)){adminEstado("Cada clave debe empezar por DEMO-.",true);return;}const boton=form.querySelector('[type="submit"]');boton.disabled=true;try{await api.agregarClaves(Number($("admin-claves-producto").value),codigos);form.reset();await recargarAdmin(`${codigos.length} claves añadidas.`);}catch(error){adminEstado(mensajeError(error),true);}finally{boton.disabled=false;} });
+  addEventListener("popstate", () => { if (PAGINA === "catalogo") { estado.busqueda = new URLSearchParams(location.search).get("q") || ""; $("buscar").value = estado.busqueda; renderizarCatalogo(); } });
+}
+
+async function aplicarRuta() {
+  const parametros = new URLSearchParams(location.search);
+  if (PAGINA === "catalogo") {
+    estado.busqueda = parametros.get("q") || "";
+    const plataforma = parametros.get("plataforma");
+    if (plataforma && Object.hasOwn(plataformas, plataforma)) estado.plataforma = plataforma;
+    renderizarCatalogo();
+  } else if (PAGINA === "producto") {
+    const id = Number(parametros.get("id"));
+    const juego = catalogo.find(item => item.id === id);
+    if (juego) mostrarDetalles(id);
+    else { $("producto-no-encontrado").hidden = false; $("detalle-contenido").hidden = true; $("resenas").hidden = true; $("detalle-titulo").textContent = "Producto no encontrado"; }
+  } else if (PAGINA === "carrito") renderizarCarrito();
+  else if (PAGINA === "checkout") {
+    if (!estado.seleccion.size) { renderizarCheckout(); $("error-formulario").hidden = false; $("error-formulario").textContent = "Tu carrito está vacío. Agrega un producto antes de continuar."; }
+    else if (!usuarioActual) { sessionStorage.setItem(CLAVE_RETORNO, "checkout.html"); location.replace("login.html"); }
+    else { renderizarCheckout(); actualizarMetodoPago(); }
+  } else if (PAGINA === "confirmacion") {
+    const ref = JSON.parse(sessionStorage.getItem('gamevault:ultimo-comprobante') || 'null');
+    if (!ref?.id) { $("confirmacion").querySelector(".confirmation-card").hidden = true; $("confirmacion-no-disponible").hidden = false; }
+    else try { renderizarConfirmacion(await api.pedido(ref.id, ref.token)); } catch (error) { $("confirmacion").querySelector(".confirmation-card").hidden = true; $("confirmacion-no-disponible").hidden = false; }
+  } else if (PAGINA === "perfil") {
+    if (!usuarioActual) { sessionStorage.setItem(CLAVE_RETORNO, "perfil.html"); location.replace("login.html"); } else renderizarPerfil();
+  } else if (PAGINA === "soporte") await cargarSoporte();
+  else if (PAGINA === "ticket") {
+    const id = parametros.get("id");
+    if (!id) $("ticket-detalle").replaceChildren(elemento("p", "error-state", "No se indicó un ticket válido.")); else await abrirTicket(id);
+  } else if (PAGINA === "admin") await cargarAdmin();
+}
+
+async function iniciar() {
+  conectarEventos();
+  localStorage.removeItem('gamevault:sesion'); sessionStorage.removeItem('gamevault:cuenta-temporal');
+  if (!localStorage.getItem(CLAVE_CARRITO) && localStorage.getItem('gamevault:carrito')) { localStorage.setItem(CLAVE_CARRITO, localStorage.getItem('gamevault:carrito')); localStorage.removeItem('gamevault:carrito'); }
+  try {
+    const datos = await obtenerVideojuegos();
+    const ids = new Set();
+    if (!Array.isArray(datos) || !datos.every(juego => { const valido = Number.isSafeInteger(juego.id) && !ids.has(juego.id) && typeof juego.titulo === "string" && typeof juego.descripcion === "string" && Object.hasOwn(plataformas, juego.plataforma) && Number.isSafeInteger(juego.precioCentavos); ids.add(juego.id); return valido; })) throw new Error("Formato de catálogo no válido");
+    catalogo = datos; restaurarCarrito();
+    try { await cargarCuenta((await api.sesion())?.user); } catch (error) { avisar("No pudimos recuperar tu cuenta: " + mensajeError(error)); }
+    actualizarCuentaUI(); actualizarSeleccion();
+    document.querySelectorAll("[data-platform], #ordenar").forEach(control => { control.disabled = false; });
+    if (PAGINA === "inicio") {
+      const destacado = catalogo[Math.floor(Math.random() * catalogo.length)];
+      if (destacado) { $("hero-titulo").textContent = destacado.titulo; const imagen = document.querySelector('.hero-art img'); imagen.src = destacado.imagen; imagen.alt = `Portada del videojuego ${destacado.titulo}`; $("hero-descripcion").textContent = destacado.descripcion; const precio=crearPrecio(destacado,"hero-price");precio.id="hero-precio";$("hero-precio").replaceWith(precio);$("hero-agregar").dataset.add=destacado.id;$("hero-agregar").disabled=!destacado.disponible;$("hero-detalles").dataset.details=destacado.id;$("hero-detalles").disabled=false; }
+    }
+    $("anio").textContent = new Date().getFullYear();
+    await aplicarRuta();
+    api.onAuth((event, session) => { if (cambiandoSesion || (session?.user?.id || null) === (usuarioActual?.id || null)) return; setTimeout(() => location.reload(), 0); });
+  } catch (error) {
+    if ($("resultados")) $("resultados").textContent = "No pudimos cargar el catálogo. Recarga la página para intentarlo de nuevo.";
+    else avisar("No pudimos cargar GameVault: " + mensajeError(error));
+    console.error(error);
+  }
+}
+
 iniciar();
