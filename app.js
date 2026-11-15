@@ -87,6 +87,20 @@ function crearImagen(juego, clase = "") {
   }, { once: true });
   return imagen;
 }
+function actualizarImagenDestacada(juego) {
+  const seccion = $("oferta");
+  if (!seccion) return;
+  const portada = seccion.querySelector(".hero-art img");
+  portada.src = juego.imagen;
+  portada.alt = `Portada del videojuego ${juego.titulo}`;
+  seccion.querySelector(".hero-background").src = juego.imagen;
+  const indicador = elemento("span", "availability-dot");
+  indicador.setAttribute("aria-hidden", "true");
+  seccion.querySelector(".hero-art figcaption").replaceChildren(
+    indicador,
+    document.createTextNode(`${plataformas[juego.plataforma].nombre} · Clave digital`)
+  );
+}
 function crearTarjeta(juego) {
   const item = elemento("li");
   const tarjeta = elemento("article", "game-card");
@@ -1067,9 +1081,7 @@ async function iniciarLegado() {
     const destacado = catalogo[Math.floor(Math.random() * catalogo.length)];
     if (destacado) {
       $("hero-titulo").textContent = destacado.titulo;
-      document.querySelector('.hero-art img').src = destacado.imagen;
-      document.querySelector('.hero-art img').alt = `Portada del videojuego ${destacado.titulo}`;
-      document.querySelector('.hero-art figcaption').textContent = plataformas[destacado.plataforma].nombre + ' · Clave digital';
+      actualizarImagenDestacada(destacado);
       $("hero-descripcion").textContent = destacado.descripcion;
       const precio = crearPrecio(destacado, "hero-price");
       precio.id = "hero-precio";
@@ -1243,7 +1255,7 @@ async function iniciar() {
     document.querySelectorAll("[data-platform], #ordenar").forEach(control => { control.disabled = false; });
     if (PAGINA === "inicio") {
       const destacado = catalogo[Math.floor(Math.random() * catalogo.length)];
-      if (destacado) { $("hero-titulo").textContent = destacado.titulo; const imagen = document.querySelector('.hero-art img'); imagen.src = destacado.imagen; imagen.alt = `Portada del videojuego ${destacado.titulo}`; $("hero-descripcion").textContent = destacado.descripcion; const precio=crearPrecio(destacado,"hero-price");precio.id="hero-precio";$("hero-precio").replaceWith(precio);$("hero-agregar").dataset.add=destacado.id;$("hero-agregar").disabled=!destacado.disponible;$("hero-detalles").dataset.details=destacado.id;$("hero-detalles").disabled=false; }
+      if (destacado) { $("hero-titulo").textContent = destacado.titulo; actualizarImagenDestacada(destacado); $("hero-descripcion").textContent = destacado.descripcion; const precio=crearPrecio(destacado,"hero-price");precio.id="hero-precio";$("hero-precio").replaceWith(precio);$("hero-agregar").dataset.add=destacado.id;$("hero-agregar").disabled=!destacado.disponible;$("hero-detalles").dataset.details=destacado.id;$("hero-detalles").disabled=false; }
     }
     $("anio").textContent = new Date().getFullYear();
     await aplicarRuta();
