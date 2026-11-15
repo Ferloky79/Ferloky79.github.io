@@ -67,6 +67,19 @@ async function esperar(page, pagina) {
       assert.ok(await page.locator('main#contenido').count(), file);
     }
 
+    // La portada y el fondo de la oferta usan la misma imagen recibida del catálogo.
+    await page.goto(`${base}/index.html`); await esperar(page, 'inicio');
+    await page.waitForFunction(() => document.querySelector('#hero-agregar').dataset.add);
+    const oferta = await page.evaluate(() => ({
+      id: Number(document.querySelector('#hero-agregar').dataset.add),
+      portada: document.querySelector('.hero-art img').getAttribute('src'),
+      fondo: document.querySelector('.hero-background').getAttribute('src')
+    }));
+    const juegoOferta = catalogo.find(juego => juego.id === oferta.id);
+    assert.ok(juegoOferta, 'la oferta debe corresponder al catálogo');
+    assert.equal(oferta.portada, juegoOferta.imagen);
+    assert.equal(oferta.fondo, juegoOferta.imagen);
+
     // Salidas claras para entradas directas inválidas o sin estado previo.
     await page.goto(`${base}/producto.html?id=999999`); await esperar(page, 'producto');
     await page.waitForFunction(() => !document.querySelector('#producto-no-encontrado').hidden);

@@ -34,7 +34,7 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .icon-definitions { position: absolute; width: 0; height: 0; overflow: hidden; }
 .container { width: min(var(--content-width), calc(100% - 96px)); margin-inline: auto; }
 .visually-hidden, .visually-hidden-focusable:not(:focus) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.visually-hidden-focusable:focus { position: absolute; top: 100%; right: 0; padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; z-index: 2; }
+.visually-hidden-focusable:focus { position: absolute; top: 100%; right: 0; padding: 10px 16px; background: var(--focus); color: #10121c; border: 2px solid #10121c; border-radius: 6px; font-weight: 700; z-index: 2; }
 .skip-link { position: fixed; inset: 10px auto auto 16px; padding: 12px 18px; background: var(--focus); color: #10121c; font-weight: 700; border-radius: 6px; transform: translateY(-180%); z-index: 100; }
 .skip-link:focus { transform: translateY(0); }
 .site-header { background: var(--surface); border-bottom: 1px solid #252937; }
@@ -84,7 +84,7 @@ svg.icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-w
 .chip-ps { top: 14%; right: 10%; }.chip-xbox { bottom: 15%; left: 4%; border-color: #60d0688c; }.chip-switch { right: 0; bottom: 25%; border-color: #ff70798c; }
 @keyframes orbit-spin { to { transform: rotate(1turn); } }
 .hero { position: relative; isolation: isolate; background: #11171b; overflow: hidden; }
-.hero::before { content: ""; position: absolute; inset: 0; z-index: -2; background: url("assets/forza.jpg") center 52% / cover no-repeat; opacity: .45; }
+.hero-background { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: center 52%; opacity: .45; }
 .hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(8,9,13,.93) 0%, rgba(8,9,13,.78) 48%, rgba(8,9,13,.35) 100%), linear-gradient(0deg, #08090d 0%, transparent 45%); }
 .hero-inner { display: grid; grid-template-columns: 1.45fr 1fr; align-items: center; gap: 56px; padding-block: 64px 58px; min-height: 490px; }
 .eyebrow { font-size: 11px; font-weight: 750; letter-spacing: .08em; }
